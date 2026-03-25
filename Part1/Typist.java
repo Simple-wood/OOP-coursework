@@ -1,5 +1,5 @@
 /**
- * Write a description of class Typist here.
+ * The Typist class is used to represent individual competitors in the Typing race game. 
  *
  * Starter code generously abandoned by Ty Posaurus, your predecessor,
  * who typed with two fingers and considered that "good enough".
@@ -34,14 +34,13 @@ public class Typist
      * @param typistSymbol  a single Unicode character representing this typist (e.g. '①', '②', '③')
      * @param typistName    the name of the typist (e.g. "TURBOFINGERS")
      * @param typistAccuracy the typist's accuracy rating, between 0.0 and 1.0
-     */
+     */ 
     public Typist(char typistSymbol, String typistName, double typistAccuracy)
     {
         this.typistSymbol = typistSymbol;
         this.typistName = typistName;
         this.typistAccuracy = typistAccuracy;
     }
-
 
     // Methods of class Typist
 
@@ -181,8 +180,18 @@ public class Typist
      */
     public void setAccuracy(double newAccuracy)
     {
-        typistAccuracy = newAccuracy;
-
+        if(newAccuracy < 0.0)
+        {
+            typistAccuracy = 0.0;
+        }
+        else if(newAccuracy > 1.0)
+        {
+            typistAccuracy = 1.0;
+        }
+        else
+        {
+            typistAccuracy = newAccuracy;
+        }
     }
 
     /**
@@ -194,5 +203,4 @@ public class Typist
     {
         typistSymbol = newSymbol;
     }
-
 }
