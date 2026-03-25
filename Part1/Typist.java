@@ -23,7 +23,7 @@ public class Typist
     private char typistSymbol;
     private double typistAccuracy;
     private int typistProgress;
-    private boolean isBurntOut;
+    private boolean burntOut;
     private int burntOutTurnsRemaining;
 
     // Constructor of class Typist
@@ -63,9 +63,14 @@ public class Typist
      */
     public void recoverFromBurnout()
     {
-        if(burntOutTurnsRemaining > 0)
+        if(burntOut)
         {
             burntOutTurnsRemaining--;
+        }
+
+        if(burntOutTurnsRemaining == 0)
+        {
+            burntOut = false;
         }
     }
 
@@ -119,7 +124,7 @@ public class Typist
      */
     public int getBurnoutTurnsRemaining()
     {
-        return 0; // placeholder - replace with correct implementation
+        return burntOutTurnsRemaining;
     }
 
     /**
@@ -128,7 +133,9 @@ public class Typist
      */
     public void resetToStart()
     {
-
+        typistProgress = 0;
+        burntOut = false;
+        burntOutTurnsRemaining = 0;
     }
 
     /**
@@ -138,7 +145,7 @@ public class Typist
      */
     public boolean isBurntOut()
     {
-        return false; // placeholder - replace with correct implementation
+        return burntOut;  
     }
 
     /**
@@ -147,7 +154,7 @@ public class Typist
      */
     public void typeCharacter()
     {
-
+        typistProgress++;
     }
 
     /**
@@ -158,7 +165,12 @@ public class Typist
      */
     public void slideBack(int amount)
     {
+        typistProgress -= amount;
 
+        if(typistProgress < 0)
+        {
+            typistProgress = 0;
+        }
     }
 
     /**
@@ -169,6 +181,7 @@ public class Typist
      */
     public void setAccuracy(double newAccuracy)
     {
+        typistAccuracy = newAccuracy;
 
     }
 
@@ -179,7 +192,7 @@ public class Typist
      */
     public void setSymbol(char newSymbol)
     {
-
+        typistSymbol = newSymbol;
     }
 
 }
