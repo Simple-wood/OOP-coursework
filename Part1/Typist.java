@@ -7,7 +7,7 @@
  * It is not optional. Good luck.
  *
  * @author Kishal Chhetri
- * @version 25/03/2026
+ * @version 29/03/2026
  */
 
 public class Typist
@@ -26,6 +26,10 @@ public class Typist
     private boolean burntOut;
     private int burntOutTurnsRemaining;
 
+    private final double upperAccuracyLimit = 1.0;
+    private final double lowerAccuracyLimit = 0.0;
+    private final int minimumProgress = 0; // Progress cannot go below 0
+
     // Constructor of class Typist
     /**
      * Constructor for objects of class Typist.
@@ -39,7 +43,8 @@ public class Typist
     {
         this.typistSymbol = typistSymbol;
         this.typistName = typistName;
-        this.typistAccuracy = typistAccuracy;
+        setAccuracy(typistAccuracy);
+        resetToStart();
     }
 
     // Methods of class Typist
@@ -52,8 +57,11 @@ public class Typist
      */
     public void burnOut(int turns)
     {
-        burntOutTurnsRemaining = turns;
-        burntOut = true;
+        if(turns > 0) // turns must be greater than 0
+        {
+            burntOutTurnsRemaining = turns;
+            burntOut = true;    
+        }
     }
 
     /**
@@ -62,11 +70,11 @@ public class Typist
      * Has no effect if the typist is not currently burnt out.
      */
     public void recoverFromBurnout()
-    {
-        
-        if(burntOutTurnsRemaining == 0)
+    { 
+        if(burntOutTurnsRemaining == 0) 
         {
             burntOut = false;
+
         }
 
         if(burntOut)
@@ -168,9 +176,9 @@ public class Typist
     {
         typistProgress -= amount;
 
-        if(typistProgress < 0)
+        if(typistProgress < minimumProgress)
         {
-            typistProgress = 0;
+            typistProgress = minimumProgress;
         }
     }
 
@@ -182,13 +190,13 @@ public class Typist
      */
     public void setAccuracy(double newAccuracy)
     {
-        if(newAccuracy < 0.0)
+        if(newAccuracy < lowerAccuracyLimit)
         {
-            typistAccuracy = 0.0;
+            typistAccuracy = lowerAccuracyLimit;
         }
-        else if(newAccuracy > 1.0)
+        else if(newAccuracy > upperAccuracyLimit)
         {
-            typistAccuracy = 1.0;
+            typistAccuracy = upperAccuracyLimit;
         }
         else
         {
