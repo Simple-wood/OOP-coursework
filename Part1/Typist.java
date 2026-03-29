@@ -71,7 +71,7 @@ public class Typist
      */
     public void recoverFromBurnout()
     { 
-        if(burntOutTurnsRemaining == 0) 
+        if(burntOutTurnsRemaining == 0 && burntOut) 
         {
             burntOut = false;
 
@@ -144,7 +144,7 @@ public class Typist
     {
         typistProgress = 0;
         burntOut = false;
-        burntOutTurnsRemaining = 0;
+        burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
     }
 
     /**
@@ -178,7 +178,7 @@ public class Typist
 
         if(typistProgress < minimumProgress)
         {
-            typistProgress = minimumProgress;
+            typistProgress = minimumProgress; // Ensures progress cannot go below 0
         }
     }
 
