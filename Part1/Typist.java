@@ -71,15 +71,15 @@ public class Typist
      */
     public void recoverFromBurnout()
     { 
+        if(burntOut)
+        {
+            burntOutTurnsRemaining--;
+        }
+
         if(burntOutTurnsRemaining == 0 && burntOut) 
         {
             burntOut = false;
 
-        }
-
-        if(burntOut)
-        {
-            burntOutTurnsRemaining--;
         }
     }
 
