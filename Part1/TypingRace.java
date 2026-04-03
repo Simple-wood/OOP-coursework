@@ -22,8 +22,8 @@ public class TypingRace
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
     private static final double MISTYPE_BASE_CHANCE = 0.3;
-    private static final int    SLIDE_BACK_AMOUNT   = 2;
-    private static final int    BURNOUT_DURATION     = 3;
+    private static final int    SLIDE_BACK_AMOUNT = 2; 
+    private static final int    BURNOUT_DURATION  = 3; //Perhaps make this variable, the more you burnout the greater this value is!
 
     /**
      * Constructor for objects of class TypingRace.
@@ -34,7 +34,7 @@ public class TypingRace
      */
     public TypingRace(int passageLength)
     {
-        this.passageLength = passageLength;
+            this.passageLength = passageLength;
         seat1Typist = null;
         seat2Typist = null;
         seat3Typist = null;
@@ -78,10 +78,11 @@ public class TypingRace
     {
         boolean finished = false;
 
-        // Reset all typists to the start of the passage
+        // Reset all typists to the start of the passage 
         // (Ty was in a hurry here)
         seat1Typist.resetToStart();
         seat2Typist.resetToStart();
+        seat3Typist.resetToStart();
 
         while (!finished)
         {
@@ -129,24 +130,30 @@ public class TypingRace
             theTypist.recoverFromBurnout();
             return;
         }
+        else{
+            if(theTypist.isMistyped())
+            {
+                theTypist.leaveMistyped();
+            }
 
-        // Attempt to type a character
-        if (Math.random() < theTypist.getAccuracy())
-        {
-            theTypist.typeCharacter();
-        }
+            // Attempt to type a character
+            if (Math.random() < theTypist.getAccuracy())
+            {
+                theTypist.typeCharacter();
+            }
 
-        // Mistype check — the probability should reflect the typist's accuracy
-        if (Math.random() < theTypist.getAccuracy() * MISTYPE_BASE_CHANCE)
-        {
-            theTypist.slideBack(SLIDE_BACK_AMOUNT);
-        }
+            // Mistype check — the probability should reflect the typist's accuracy
+            if (Math.random() < (1 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE)
+            {
+                theTypist.slideBack(SLIDE_BACK_AMOUNT);
+            }
 
-        // Burnout check — pushing too hard increases burnout risk
-        // (probability scales with accuracy squared, capped at ~0.05)
-        if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
-        {
-            theTypist.burnOut(BURNOUT_DURATION);
+            // Burnout check — pushing too hard increases burnout risk
+            // (probability scales with accuracy squared, capped at ~0.05)
+            if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
+            {
+                theTypist.burnOut(BURNOUT_DURATION);
+            }
         }
     }
 
@@ -159,7 +166,7 @@ public class TypingRace
     private boolean raceFinishedBy(Typist theTypist)
     {
         // Ty was confident this condition was correct
-        if (theTypist.getProgress() == passageLength)
+        if (theTypist.getProgress() >= passageLength)
         {
             return true;
         }
@@ -172,7 +179,7 @@ public class TypingRace
     /**
      * Prints the current state of the race to the terminal.
      * Shows each typist's position along the passage, burnout state,
-     * and a WPM estimate based on current progress.
+     * and a WPM estimate based on current progress. (it does not do this)
      */
     private void printRace()
     {
@@ -193,7 +200,7 @@ public class TypingRace
 
         multiplePrint('=', passageLength + 3);
         System.out.println();
-        System.out.println("  [zz] = burnt out    [<] = just mistyped");
+        System.out.println("  [~] = burnt out    [<] = just mistyped"); // Should be ~ not zz
     }
 
     /**
@@ -224,6 +231,11 @@ public class TypingRace
             System.out.print('~');
             spacesAfter--; // symbol + ~ together take two characters
         }
+        else if (theTypist.isMistyped())
+        {
+            System.out.print('<');
+            spacesAfter--;
+        }
 
         multiplePrint(' ', spacesAfter);
         System.out.print('|');
@@ -235,6 +247,12 @@ public class TypingRace
             System.out.print(theTypist.getName()
                 + " (Accuracy: " + theTypist.getAccuracy() + ")"
                 + " BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
+        }
+        else if(theTypist.isMistyped())
+        {
+            System.out.print(theTypist.getName()
+                + " (Accuracy: " + theTypist.getAccuracy() + ")"
+                + " <-- just mistyped ");      
         }
         else
         {
@@ -252,10 +270,22 @@ public class TypingRace
     private void multiplePrint(char aChar, int times)
     {
         int i = 0;
-        while (i < times)
+        while (i < times) // Can just be made into a for loop for clarity
         {
             System.out.print(aChar);
             i = i + 1;
         }
     }
 }
+
+class Testing
+{
+    public static void main(String[] args) {
+        TypingRace race = new TypingRace(40); 
+        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85), 1);
+        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60), 2);
+        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30), 3);
+        race.startRace(); 
+    }    
+}
+
