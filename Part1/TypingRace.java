@@ -1,4 +1,6 @@
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.lang.Math;
 
 /**
@@ -18,6 +20,7 @@ public class TypingRace
     private Typist seat1Typist;
     private Typist seat2Typist;
     private Typist seat3Typist;
+    private ArrayList<Typist> typists;;
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
@@ -34,10 +37,11 @@ public class TypingRace
      */
     public TypingRace(int passageLength)
     {
-            this.passageLength = passageLength;
+        this.passageLength = passageLength;
         seat1Typist = null;
         seat2Typist = null;
         seat3Typist = null;
+        typists = new ArrayList<>();
     }
 
     /**
@@ -46,23 +50,20 @@ public class TypingRace
      * @param theTypist  the typist to seat
      * @param seatNumber the seat to place them in (1–3)
      */
-    public void addTypist(Typist theTypist, int seatNumber)
+    public void addTypist(Typist theTypist)
     {
-        if (seatNumber == 1)
+        typists.add(theTypist);
+    }
+
+    public void resetTypists()
+    {
+        Iterator<Typist> typistsIterator = typists.iterator();
+        Typist currentTypist = null;
+
+        while(typistsIterator.hasNext())
         {
-            seat1Typist = theTypist;
-        }
-        else if (seatNumber == 2)
-        {
-            seat2Typist = theTypist;
-        }
-        else if (seatNumber == 3)
-        {
-            seat3Typist = theTypist;
-        }
-        else
-        {
-            System.out.println("Cannot seat typist at seat " + seatNumber + " — there is no such seat.");
+            currentTypist = typistsIterator.next();
+            currentTypist.resetToStart();
         }
     }
 
@@ -231,6 +232,7 @@ public class TypingRace
             System.out.print('~');
             spacesAfter--; // symbol + ~ together take two characters
         }
+        // Append < when burnt out so the state is visible without hiding identity.
         else if (theTypist.isMistyped())
         {
             System.out.print('<');
@@ -250,7 +252,7 @@ public class TypingRace
         }
         else if(theTypist.isMistyped())
         {
-            System.out.print(" <-- just mistyped ");      
+            System.out.print(" ← just mistyped ");      
         }
     }
 
@@ -262,11 +264,9 @@ public class TypingRace
      */
     private void multiplePrint(char aChar, int times)
     {
-        int i = 0;
-        while (i < times) // Can just be made into a for loop for clarity
+        for(int i = 0; i < times; i++)
         {
             System.out.print(aChar);
-            i = i + 1;
         }
     }
 }
@@ -275,9 +275,9 @@ class Testing
 {
     public static void main(String[] args) {
         TypingRace race = new TypingRace(40); 
-        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85), 1);
-        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60), 2);
-        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30), 3);
+        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85));
+        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60));
+        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30));
         race.startRace(); 
     }    
 }
