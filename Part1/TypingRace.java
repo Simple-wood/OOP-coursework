@@ -49,9 +49,8 @@ public class TypingRace
         typists.add(theTypist);
     }
 
-    public void resetTypists()
+    public void resetTypists(Iterator<Typist> typistsIterator)
     {
-        Iterator<Typist> typistsIterator = typists.iterator();
         Typist currentTypist = null;
 
         while(typistsIterator.hasNext())
@@ -61,9 +60,8 @@ public class TypingRace
         }
     }
 
-    public void advanceTypists()
+    public void advanceTypists(Iterator<Typist> typistsIterator)
     {
-        Iterator<Typist> typistsIterator = typists.iterator();
         Typist currentTypist = null;
 
         while(typistsIterator.hasNext())
@@ -73,9 +71,8 @@ public class TypingRace
         }       
     }
 
-    public boolean checkWinners()
+    public boolean checkWinners(Iterator<Typist> typistsIterator)
     {
-        Iterator<Typist> typistsIterator = typists.iterator();
         Typist currentTypist = null;
 
         while(typistsIterator.hasNext())
@@ -103,27 +100,30 @@ public class TypingRace
     public void startRace()
     {
         boolean finished = false;
-
+        Iterator<Typist> typistsIterator = typists.iterator();
         // Reset all typists to the start of the passage 
-        // (Ty was in a hurry here)
-        resetTypists();
+        resetTypists(typistsIterator);
 
         while (!finished)
         {
-            // Advance each typist by one turn
-            advanceTypists();
-
             // Print the current state of the race
             printRace();
 
+            // Advance each typist by one turn
+            typistsIterator = typists.iterator();
+            advanceTypists(typistsIterator);
+
             // Check if any typist has finished the passage
-            finished = checkWinners();
+            typistsIterator = typists.iterator();
+            finished = checkWinners(typistsIterator);
 
             // Wait 200ms between turns so the animation is visible
             try {
                 TimeUnit.MILLISECONDS.sleep(200);
             } catch (Exception e) {}
         }
+
+        printRace();
 
         // TODO (Task 2a): Print the winner's name here
     }
@@ -246,6 +246,7 @@ public class TypingRace
         // Always show the typist's symbol so they can be identified on screen.
         // Append ~ when burnt out so the state is visible without hiding identity.
         System.out.print(theTypist.getSymbol());
+
         if (theTypist.isBurntOut())
         {
             System.out.print('~');
@@ -261,7 +262,6 @@ public class TypingRace
         multiplePrint(' ', spacesAfter);
         System.out.print('|');
         System.out.print(' ');
-        
         System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.getAccuracy() + ")");
 
         // Print name and accuracy
