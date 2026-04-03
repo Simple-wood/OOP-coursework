@@ -24,6 +24,7 @@ public class Typist
     private double typistAccuracy;
     private int typistProgress;
     private boolean burntOut;
+    private boolean mistyped; // boolean flag to represent if a typist has mistyped or not
     private int burntOutTurnsRemaining;
 
     private final double upperAccuracyLimit = 1.0;
@@ -70,7 +71,7 @@ public class Typist
      * Has no effect if the typist is not currently burnt out.
      */
     public void recoverFromBurnout()
-    { 
+    {
         if(burntOut)
         {
             burntOutTurnsRemaining--;
@@ -145,6 +146,7 @@ public class Typist
         typistProgress = 0;
         burntOut = false;
         burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
+        mistyped = false;
     }
 
     /**
@@ -155,6 +157,11 @@ public class Typist
     public boolean isBurntOut()
     {
         return burntOut;  
+    }
+
+    public boolean isMistyped()
+    {
+        return mistyped;
     }
 
     /**
@@ -179,6 +186,16 @@ public class Typist
         if(typistProgress < minimumProgress)
         {
             typistProgress = minimumProgress; // Ensures progress cannot go below 0
+        }
+
+        mistyped = true;
+    }
+
+    public void leaveMistyped()
+    {
+        if(mistyped)
+        {
+            mistyped = false;
         }
     }
 
