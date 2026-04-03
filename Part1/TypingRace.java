@@ -240,24 +240,17 @@ public class TypingRace
         multiplePrint(' ', spacesAfter);
         System.out.print('|');
         System.out.print(' ');
+        
+        System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.getAccuracy() + ")");
 
         // Print name and accuracy
         if (theTypist.isBurntOut())
         {
-            System.out.print(theTypist.getName()
-                + " (Accuracy: " + theTypist.getAccuracy() + ")"
-                + " BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
+            System.out.print(" BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
         }
         else if(theTypist.isMistyped())
         {
-            System.out.print(theTypist.getName()
-                + " (Accuracy: " + theTypist.getAccuracy() + ")"
-                + " <-- just mistyped ");      
-        }
-        else
-        {
-            System.out.print(theTypist.getName()
-                + " (Accuracy: " + theTypist.getAccuracy() + ")");
+            System.out.print(" <-- just mistyped ");      
         }
     }
 
