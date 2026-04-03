@@ -17,9 +17,6 @@ import java.lang.Math;
 public class TypingRace
 {
     private int passageLength;   // Total characters in the passage to type
-    private Typist seat1Typist;
-    private Typist seat2Typist;
-    private Typist seat3Typist;
     private ArrayList<Typist> typists;;
 
     // Accuracy thresholds for mistype and burnout events
@@ -38,9 +35,6 @@ public class TypingRace
     public TypingRace(int passageLength)
     {
         this.passageLength = passageLength;
-        seat1Typist = null;
-        seat2Typist = null;
-        seat3Typist = null;
         typists = new ArrayList<>();
     }
 
@@ -67,6 +61,37 @@ public class TypingRace
         }
     }
 
+    public void advanceTypists()
+    {
+        Iterator<Typist> typistsIterator = typists.iterator();
+        Typist currentTypist = null;
+
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+            advanceTypist(currentTypist);
+        }       
+    }
+
+    public boolean checkWinners()
+    {
+        Iterator<Typist> typistsIterator = typists.iterator();
+        Typist currentTypist = null;
+
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+            boolean winnerAvaliable = raceFinishedBy(currentTypist);
+
+            if(winnerAvaliable)
+            {
+                return true;
+            }
+        } 
+
+        return false;
+    }
+
     /**
      * Starts the typing race.
      * All typists are reset to the beginning, then the simulation runs
@@ -81,25 +106,18 @@ public class TypingRace
 
         // Reset all typists to the start of the passage 
         // (Ty was in a hurry here)
-        seat1Typist.resetToStart();
-        seat2Typist.resetToStart();
-        seat3Typist.resetToStart();
+        resetTypists();
 
         while (!finished)
         {
             // Advance each typist by one turn
-            advanceTypist(seat1Typist);
-            advanceTypist(seat2Typist);
-            advanceTypist(seat3Typist);
+            advanceTypists();
 
             // Print the current state of the race
             printRace();
 
             // Check if any typist has finished the passage
-            if ( raceFinishedBy(seat1Typist) || raceFinishedBy(seat2Typist) || raceFinishedBy(seat3Typist) )
-            {
-                finished = true;
-            }
+            finished = checkWinners();
 
             // Wait 200ms between turns so the animation is visible
             try {
@@ -190,14 +208,15 @@ public class TypingRace
         multiplePrint('=', passageLength + 3);
         System.out.println();
 
-        printSeat(seat1Typist);
-        System.out.println();
+        Iterator<Typist> typistsIterator = typists.iterator();
+        Typist currentTypist = null;
 
-        printSeat(seat2Typist);
-        System.out.println();
-
-        printSeat(seat3Typist);
-        System.out.println();
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+            printSeat(currentTypist);
+            System.out.println();
+        } 
 
         multiplePrint('=', passageLength + 3);
         System.out.println();
