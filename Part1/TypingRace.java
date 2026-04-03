@@ -159,19 +159,19 @@ public class TypingRace
             if (Math.random() < theTypist.getAccuracy())
             {
                 theTypist.typeCharacter();
-            }
 
-            // Mistype check — the probability should reflect the typist's accuracy
-            if (Math.random() < (1 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE)
-            {
-                theTypist.slideBack(SLIDE_BACK_AMOUNT);
-            }
+                // Mistype check — the probability should reflect the typist's accuracy
+                if (Math.random() < (1 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE)
+                {
+                    theTypist.slideBack(SLIDE_BACK_AMOUNT);
+                }
 
-            // Burnout check — pushing too hard increases burnout risk
-            // (probability scales with accuracy squared, capped at ~0.05)
-            if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
-            {
-                theTypist.burnOut(BURNOUT_DURATION);
+                // Burnout check — pushing too hard increases burnout risk
+                // (probability scales with accuracy squared, capped at ~0.05)
+                if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
+                {
+                    theTypist.burnOut(BURNOUT_DURATION);
+                }
             }
         }
     }
