@@ -88,6 +88,18 @@ public class TypingRace
 
         return false;
     }
+    
+    public void printTypists(Iterator<Typist> typistsIterator)
+    {
+        Typist currentTypist = null;
+
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+            printSeat(currentTypist);
+            System.out.println();
+        } 
+    }
 
     /**
      * Starts the typing race.
@@ -209,14 +221,7 @@ public class TypingRace
         System.out.println();
 
         Iterator<Typist> typistsIterator = typists.iterator();
-        Typist currentTypist = null;
-
-        while(typistsIterator.hasNext())
-        {
-            currentTypist = typistsIterator.next();
-            printSeat(currentTypist);
-            System.out.println();
-        } 
+        printTypists(typistsIterator);
 
         multiplePrint('=', passageLength + 3);
         System.out.println();
@@ -300,4 +305,3 @@ class Testing
         race.startRace(); 
     }    
 }
-
