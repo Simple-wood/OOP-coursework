@@ -254,5 +254,5 @@ public class Typist
     public void incrementNumberOfMistypes()
     {
         numberOfMistypes++;
-        }
+    }
 }
