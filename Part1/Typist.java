@@ -27,6 +27,9 @@ public class Typist
     private boolean mistyped; // boolean flag to represent if a typist has mistyped or not
     private int burntOutTurnsRemaining;
 
+    private int numberOfBurnouts;
+    private int numberOfMistypes;
+
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
     private final int minimumProgress = 0; // Progress cannot go below 0
@@ -137,6 +140,16 @@ public class Typist
         return burntOutTurnsRemaining;
     }
 
+    public int getNumberOfBurnouts()
+    {
+        return numberOfBurnouts;
+    }
+
+    public int getNumberOfMistypes()
+    {
+        return numberOfMistypes;
+    }
+
     /**
      * Resets the typist to their initial state, ready for a new race.
      * Progress returns to zero, burnout is cleared entirely.
@@ -147,6 +160,9 @@ public class Typist
         burntOut = false;
         burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
         mistyped = false;
+        numberOfBurnouts = 0;
+        numberOfMistypes = 0;
+
     }
 
     /**
@@ -229,5 +245,15 @@ public class Typist
     public void setSymbol(char newSymbol)
     {
         typistSymbol = newSymbol;
+    }
+
+    public void incrementNumberOfBurnouts()
+    {
+        numberOfBurnouts++;
+    }
+
+    public void incrementNumberOfMistypes()
+    {
+        numberOfMistypes++;
     }
 }
