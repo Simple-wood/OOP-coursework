@@ -196,6 +196,11 @@ public class Typist
      */
     public void slideBack(int amount)
     {
+        if(amount <= 0)
+        {
+            return;
+        }
+        
         typistProgress -= amount;
 
         if(typistProgress < minimumProgress)
