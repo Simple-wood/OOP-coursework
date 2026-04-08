@@ -162,7 +162,6 @@ public class Typist
         mistyped = false;
         numberOfBurnouts = 0;
         numberOfMistypes = 0;
-
     }
 
     /**
@@ -197,6 +196,11 @@ public class Typist
      */
     public void slideBack(int amount)
     {
+        if(amount <= 0)
+        {
+            return;
+        }
+        
         typistProgress -= amount;
 
         if(typistProgress < minimumProgress)

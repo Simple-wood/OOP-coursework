@@ -17,12 +17,13 @@ import java.lang.Math;
 public class TypingRace
 {
     private int passageLength;   // Total characters in the passage to type
-    private ArrayList<Typist> typists;;
+    private ArrayList<Typist> typists;
+    private Typist winner = null;
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
     private static final double MISTYPE_BASE_CHANCE = 0.3;
-    private static final int    SLIDE_BACK_AMOUNT = 2; 
+    private static final int    SLIDE_BACK_AMOUNT = 2; // I wanna make this vary
     private static final int    BURNOUT_DURATION  = 3; //Perhaps make this variable, the more you burnout the greater this value is!
 
     /**
@@ -49,7 +50,7 @@ public class TypingRace
         typists.add(theTypist);
     }
 
-    public void resetTypists(Iterator<Typist> typistsIterator)
+    private void resetTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
 
@@ -60,7 +61,7 @@ public class TypingRace
         }
     }
 
-    public void advanceTypists(Iterator<Typist> typistsIterator)
+    private void advanceTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
 
@@ -71,7 +72,7 @@ public class TypingRace
         }       
     }
 
-    public boolean checkWinners(Iterator<Typist> typistsIterator)
+    private boolean checkWinners(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
 
@@ -82,6 +83,7 @@ public class TypingRace
 
             if(winnerAvaliable)
             {
+                winner = currentTypist;
                 return true;
             }
         } 
@@ -89,7 +91,7 @@ public class TypingRace
         return false;
     }
     
-    public void printTypists(Iterator<Typist> typistsIterator)
+    private void printTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
 
@@ -135,9 +137,26 @@ public class TypingRace
             } catch (Exception e) {}
         }
 
-        printRace();
+        printRace(); // Account for last frame of the race
 
-        // TODO (Task 2a): Print the winner's name here
+        // Handles the printing of winner and updating accuracy for typists
+        typistsIterator = typists.iterator();
+        endRace(typistsIterator);
+    }
+
+    private void endRace(Iterator<Typist> typistsIterator)
+    {
+        double oldWinnerAccuracy = winner.getAccuracy();
+        updateTypistRatings(typistsIterator);
+        printWinner(oldWinnerAccuracy); 
+    }
+
+    private void printWinner(double oldAccuracy)
+    {
+        System.out.println();
+        System.out.println("And the winner is .... " + winner.getName());
+        System.out.println("Final accuracy is: " + winner.getAccuracy() + " (improved from " + oldAccuracy + ")");
+        System.out.println(winner.getNumberOfBurnouts());
     }
 
     /**
@@ -154,7 +173,9 @@ public class TypingRace
      * @param theTypist the typist to advance
      */
     private void advanceTypist(Typist theTypist)
-    {
+    { 
+        double typistAccuracy = theTypist.getAccuracy();
+
         if (theTypist.isBurntOut())
         {
             // Recovering from burnout — skip this turn
@@ -168,23 +189,67 @@ public class TypingRace
         }
 
             // Attempt to type a character
-        if (Math.random() < theTypist.getAccuracy())
+        if (Math.random() < typistAccuracy)
         {
             theTypist.typeCharacter();
 
+            if(raceFinishedBy(theTypist)) // If we have finished the race now, there is no need to check for burnouts or mistypes!
+            {
+                return;
+            }
+
             // Mistype check — the probability should reflect the typist's accuracy
-            if (Math.random() < (1 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE)
+            
+            if (Math.random() < (1 - typistAccuracy) * MISTYPE_BASE_CHANCE)
             {
                 theTypist.slideBack(SLIDE_BACK_AMOUNT);
+                theTypist.incrementNumberOfMistypes();
             }
 
             // Burnout check — pushing too hard increases burnout risk
             // (probability scales with accuracy squared, capped at ~0.05)
-            if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy())
+            if (Math.random() < (0.05 + (0.05 * Math.pow(typistAccuracy, 2)) * Math.pow(typistAccuracy, 2)))
             {
                 theTypist.burnOut(BURNOUT_DURATION);
+                theTypist.incrementNumberOfBurnouts();
             }
         }
+    }
+
+    private void updateTypistRatings(Iterator<Typist> typistIterator)
+    {
+        final double SWING_FACTOR = 0.025;
+        final double WIN_OUTCOME = 1.0;
+        final double LOSS_OUTCOME = 0.0;
+
+        Typist currentTypist = null;
+        
+
+        while(typistIterator.hasNext())
+        {
+            currentTypist = typistIterator.next();
+            double currentAccuracy = currentTypist.getAccuracy();
+            double outcome = LOSS_OUTCOME;
+            int numberOfBurnouts = currentTypist.getNumberOfBurnouts();
+            
+            if(currentTypist == winner)
+            {
+                outcome = WIN_OUTCOME;
+            }
+
+            double newAccuracy = calculateNewAccuracy(SWING_FACTOR, outcome, currentAccuracy, numberOfBurnouts);
+            currentTypist.setAccuracy(newAccuracy);
+        }
+    }
+
+    private double calculateNewAccuracy(double swingFactor, double outcome, double oldAccuracy, int numberOfBurnouts)
+    {
+        double penalty = 0.075 * numberOfBurnouts;
+        double newAccuracy = oldAccuracy + swingFactor * (outcome - penalty);
+
+        newAccuracy = (int)(newAccuracy * 1000) / 1000.0; // rounding to 3dp
+
+        return newAccuracy; 
     }
 
     /**
@@ -195,7 +260,6 @@ public class TypingRace
      */
     private boolean raceFinishedBy(Typist theTypist)
     {
-        // Ty was confident this condition was correct
         if (theTypist.getProgress() >= passageLength)
         {
             return true;
@@ -269,7 +333,7 @@ public class TypingRace
         System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.getAccuracy() + ")");
 
         // Print name and accuracy
-        if (theTypist.isBurntOut())
+        if (theTypist.isBurntOut()) // Burnout takes priority
         {
             System.out.print(" BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
         }
