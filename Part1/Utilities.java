@@ -90,7 +90,7 @@ public class Utilities
 
         while(! validResponses.contains(response))
         {
-            System.out.println("Please respond with either \"y\" or \"n\"");     
+            System.out.println("Please respond with either \"Y/y\" or \"N/n\"");     
             response = getUserInput(message, scanner);
         }
 
