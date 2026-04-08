@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Utilities
@@ -73,11 +75,25 @@ public class Utilities
 
             }
             else{
-                System.out.println("Please enter a Character!");
+                System.out.println("Please enter a valid character!");
                 response = getUserInput(message, scanner).trim();
             }
         }
 
         return charResponse;
+    }
+
+    public static String getChoice(String message, Scanner scanner)
+    {
+        String response = getUserInput(message, scanner);
+        ArrayList<String> validResponses = new ArrayList<>(List.of("Y", "y", "N", "n"));
+
+        while(! validResponses.contains(response))
+        {
+            System.out.println("Please respond with either \"y\" or \"n\"");     
+            response = getUserInput(message, scanner);
+        }
+
+        return response;
     }
 }
