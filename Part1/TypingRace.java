@@ -2,6 +2,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.lang.Math;
+import java.util.Scanner;
 
 /**
  * A typing race simulation. Three typists race to complete a passage of text,
@@ -18,13 +19,13 @@ public class TypingRace
 {
     private int passageLength;   // Total characters in the passage to type
     private ArrayList<Typist> typists;
-    private Typist winner = null;
+    private Typist winner = null; // Winning typist, null represents that there is no winner as of yet
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
     private static final double MISTYPE_BASE_CHANCE = 0.3;
     private static final int    SLIDE_BACK_AMOUNT = 2; // I wanna make this vary
-    private static final int    BURNOUT_DURATION  = 3; //Perhaps make this variable, the more you burnout the greater this value is!
+    private static final int    BURNOUT_DURATION  = 3; 
 
     /**
      * Constructor for objects of class TypingRace.
@@ -45,7 +46,7 @@ public class TypingRace
      * @param theTypist  the typist to seat
      * @param seatNumber the seat to place them in (1–3)
      */
-    public void addTypist(Typist theTypist)
+    private void addTypist(Typist theTypist)
     {
         typists.add(theTypist);
     }
@@ -81,7 +82,7 @@ public class TypingRace
             currentTypist = typistsIterator.next();
             boolean winnerAvaliable = raceFinishedBy(currentTypist);
 
-            if(winnerAvaliable)
+            if(winnerAvaliable && winner == null)
             {
                 winner = currentTypist;
                 return true;
@@ -101,6 +102,71 @@ public class TypingRace
             printSeat(currentTypist);
             System.out.println();
         } 
+    }
+
+    public void configureTypists(Scanner scanner)
+    {
+        ArrayList<Character> seenTypistSymbols = new ArrayList<>();
+        ArrayList<String> seenTypistNames = new ArrayList<>();
+        String choice = "";
+        int numberOfTypists = 0;
+
+        while(! (choice.equals("N") ||  choice.equals("n"))) // We guarentee at least 1 typist in the simulation
+        {
+            numberOfTypists++;
+            System.out.println("Welcome Typist no. " + numberOfTypists);
+
+            String name = configureName(seenTypistNames, scanner);
+            char typistSymbol = configureSymbol(seenTypistSymbols, scanner);
+            double typistAccuracy = configureAccuracy(scanner);
+            Typist typist = new Typist(typistSymbol, name, typistAccuracy);
+
+            seenTypistNames.add(name);
+            seenTypistSymbols.add(typistSymbol);
+            addTypist(typist);
+
+            choice = Utilities.getChoice("Would you like to add another typist (y/n) - ", scanner);
+        }
+    }
+
+    private char configureSymbol(ArrayList<Character> seenSymbols, Scanner scanner)
+    {
+        char symbol = Utilities.getCharacter("Please enter a character to represent your typist - ", scanner);
+
+        while(seenSymbols.contains(symbol))
+        {
+            System.out.println("Sorry, that symbol is already taken!");
+            symbol = Utilities.getCharacter("Please enter a character to represent your typist - ", scanner);
+        }
+
+        return symbol;
+    }
+
+    private double configureAccuracy(Scanner scanner)
+    {
+        double accuracy = Utilities.getDouble("Please enter an accuracy for your typist (0.0 - 1.0) - ", scanner);
+
+        while(accuracy < 0.0 || accuracy > 1.0)
+        {
+            System.out.println("You must enter an accuracy between 0.0 and 1.0 inclusive!");
+            accuracy = Utilities.getDouble("Please enter an accuracy for your typist (0.0 - 1.0) - ", scanner);
+        }
+
+        return accuracy;
+    }
+
+    private String configureName(ArrayList<String> seenNames, Scanner scanner)
+    {
+        String name =  Utilities.getUserInput("Please enter the name of your typist - ", scanner);
+
+        while(seenNames.contains(name))
+        {
+            System.out.println("hello");
+            System.out.println("Sorry, that name is already taken!");
+            name = Utilities.getUserInput("Please enter the name of your typist - ", scanner);
+        }
+
+        return name;
     }
 
     /**
@@ -148,7 +214,8 @@ public class TypingRace
     {
         double oldWinnerAccuracy = winner.getAccuracy();
         updateTypistRatings(typistsIterator);
-        printWinner(oldWinnerAccuracy); 
+        printWinner(oldWinnerAccuracy);
+        winner = null; 
     }
 
     private void printWinner(double oldAccuracy)
@@ -156,7 +223,6 @@ public class TypingRace
         System.out.println();
         System.out.println("And the winner is .... " + winner.getName());
         System.out.println("Final accuracy is: " + winner.getAccuracy() + " (improved from " + oldAccuracy + ")");
-        System.out.println(winner.getNumberOfBurnouts());
     }
 
     /**
@@ -244,7 +310,8 @@ public class TypingRace
 
     private double calculateNewAccuracy(double swingFactor, double outcome, double oldAccuracy, int numberOfBurnouts)
     {
-        double penalty = 0.075 * numberOfBurnouts;
+        final double PENALTY_CONSTANT_FACTOR = 0.075;
+        double penalty = PENALTY_CONSTANT_FACTOR * numberOfBurnouts;
         double newAccuracy = oldAccuracy + swingFactor * (outcome - penalty);
 
         newAccuracy = (int)(newAccuracy * 1000) / 1000.0; // rounding to 3dp
@@ -362,9 +429,14 @@ class Testing
 {
     public static void main(String[] args) {
         TypingRace race = new TypingRace(40); 
-        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85));
-        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60));
-        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30));
-        race.startRace(); 
+        Scanner scanner = new Scanner(System.in);
+        String choice = "";
+        race.configureTypists(scanner);
+
+        while(! (choice.equals("N") || choice.equals("n")))
+        {
+            race.startRace(); 
+            choice = Utilities.getChoice("Would you like to race again (y/n) - ", scanner);
+        }
     }    
 }
