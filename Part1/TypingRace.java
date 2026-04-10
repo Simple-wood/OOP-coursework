@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.lang.Math;
 import java.util.Scanner;
+import java.util.Random;
 
 /**
  * A typing race simulation. Three typists race to complete a passage of text,
@@ -23,8 +24,8 @@ public class TypingRace
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
-    private static final double MISTYPE_BASE_CHANCE = 0.3;
-    private static final int    SLIDE_BACK_AMOUNT = 2; // I wanna make this vary
+    private static final double MISTYPE_BASE_CHANCE = 0.2;
+    private static final int    SLIDE_BACK_AMOUNT = 3; 
     private static final int    BURNOUT_DURATION  = 3; 
 
     /**
@@ -268,7 +269,10 @@ public class TypingRace
             
             if (Math.random() < (1 - typistAccuracy) * MISTYPE_BASE_CHANCE)
             {
-                theTypist.slideBack(SLIDE_BACK_AMOUNT);
+                Random random = new Random();
+                int slideBackAmount = random.nextInt(0, SLIDE_BACK_AMOUNT) + 1;
+
+                theTypist.slideBack(slideBackAmount);
                 theTypist.incrementNumberOfMistypes();
             }
 
@@ -428,9 +432,11 @@ public class TypingRace
 class Testing
 {
     public static void main(String[] args) {
-        TypingRace race = new TypingRace(40); 
         Scanner scanner = new Scanner(System.in);
+        int passage = Utilities.getPassageLength(scanner);
         String choice = "";
+        TypingRace race = new TypingRace(passage); 
+        
         race.configureTypists(scanner);
 
         while(! (choice.equals("N") || choice.equals("n")))
