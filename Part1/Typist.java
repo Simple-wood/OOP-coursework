@@ -28,7 +28,6 @@ public class Typist
     private int burntOutTurnsRemaining;
 
     private int numberOfBurnouts;
-    private int numberOfMistypes;
 
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
@@ -140,14 +139,14 @@ public class Typist
         return burntOutTurnsRemaining;
     }
 
+    /**
+     * Returns how many times this typist burnt out during the current race.
+     *
+     * @return number of burnout events recorded
+     */
     public int getNumberOfBurnouts()
     {
         return numberOfBurnouts;
-    }
-
-    public int getNumberOfMistypes()
-    {
-        return numberOfMistypes;
     }
 
     /**
@@ -161,7 +160,6 @@ public class Typist
         burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
         mistyped = false;
         numberOfBurnouts = 0;
-        numberOfMistypes = 0;
     }
 
     /**
@@ -174,6 +172,11 @@ public class Typist
         return burntOut;  
     }
 
+    /**
+     * Returns true if the typist is currently marked as having just mistyped.
+     *
+     * @return true if currently in the mistyped state
+     */
     public boolean isMistyped()
     {
         return mistyped;
@@ -211,6 +214,9 @@ public class Typist
         mistyped = true;
     }
 
+    /**
+     * Clears the temporary mistyped state marker for this typist.
+     */
     public void leaveMistyped()
     {
         if(mistyped)
@@ -251,13 +257,11 @@ public class Typist
         typistSymbol = newSymbol;
     }
 
+    /**
+     * Increments the burnout counter by one event.
+     */
     public void incrementNumberOfBurnouts()
     {
         numberOfBurnouts++;
-    }
-
-    public void incrementNumberOfMistypes()
-    {
-        numberOfMistypes++;
     }
 }

@@ -13,8 +13,8 @@ import java.util.Random;
  * two-finger technique". He assured us the code was "basically done".
  * We have found evidence to the contrary.
  *
- * @author TyPosaurus
- * @version 0.7 (the other 0.3 is left as an exercise for the reader)
+ * @author Kishal Chhetri
+ * @version 1.0
  */
 public class TypingRace
 {
@@ -52,6 +52,11 @@ public class TypingRace
         typists.add(theTypist);
     }
 
+    /**
+     * Resets all typists in the given iterator back to their starting state.
+     *
+     * @param typistsIterator iterator over typists currently in the race
+     */
     private void resetTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -63,6 +68,11 @@ public class TypingRace
         }
     }
 
+    /**
+     * Advances each typist in the iterator by one simulated turn.
+     *
+     * @param typistsIterator iterator over typists currently in the race
+     */
     private void advanceTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -74,6 +84,13 @@ public class TypingRace
         }       
     }
 
+    /**
+     * Checks whether any typist in the iterator has finished the race.
+     * The first finisher encountered is stored as the race winner.
+     *
+     * @param typistsIterator iterator over typists currently in the race
+     * @return true if a winner was found, false otherwise
+     */
     private boolean checkWinners(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -93,6 +110,11 @@ public class TypingRace
         return false;
     }
     
+    /**
+     * Prints all typist lanes in their current state.
+     *
+     * @param typistsIterator iterator over typists to print
+     */
     private void printTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -105,6 +127,12 @@ public class TypingRace
         } 
     }
 
+    /**
+     * Interactively configures and adds typists for this race.
+     * Ensures names and symbols are unique among all configured typists.
+     *
+     * @param scanner scanner used to read user input
+     */
     public void configureTypists(Scanner scanner)
     {
         ArrayList<Character> seenTypistSymbols = new ArrayList<>();
@@ -127,9 +155,17 @@ public class TypingRace
             addTypist(typist);
 
             choice = Utilities.getChoice("Would you like to add another typist (y/n) - ", scanner);
+            System.out.println();
         }
     }
 
+    /**
+     * Prompts the user for a typist symbol and validates uniqueness.
+     *
+     * @param seenSymbols symbols already assigned to existing typists
+     * @param scanner scanner used to read user input
+     * @return a unique symbol for the new typist
+     */
     private char configureSymbol(ArrayList<Character> seenSymbols, Scanner scanner)
     {
         char symbol = Utilities.getCharacter("Please enter a character to represent your typist - ", scanner);
@@ -143,6 +179,12 @@ public class TypingRace
         return symbol;
     }
 
+    /**
+     * Prompts the user for a typist accuracy and validates range [0.0, 1.0].
+     *
+     * @param scanner scanner used to read user input
+     * @return a valid accuracy value between 0.0 and 1.0 inclusive
+     */
     private double configureAccuracy(Scanner scanner)
     {
         double accuracy = Utilities.getDouble("Please enter an accuracy for your typist (0.0 - 1.0) - ", scanner);
@@ -156,6 +198,13 @@ public class TypingRace
         return accuracy;
     }
 
+    /**
+     * Prompts the user for a typist name and validates uniqueness.
+     *
+     * @param seenNames names already assigned to existing typists
+     * @param scanner scanner used to read user input
+     * @return a unique name for the new typist
+     */
     private String configureName(ArrayList<String> seenNames, Scanner scanner)
     {
         String name =  Utilities.getUserInput("Please enter the name of your typist - ", scanner);
@@ -211,6 +260,12 @@ public class TypingRace
         endRace(typistsIterator);
     }
 
+    /**
+     * Finalizes the race by updating ratings and announcing the winner.
+     * Resets the winner field afterwards so a new race can begin cleanly.
+     *
+     * @param typistsIterator iterator over all typists in the race
+     */
     private void endRace(Iterator<Typist> typistsIterator)
     {
         double oldWinnerAccuracy = winner.getAccuracy();
@@ -219,6 +274,11 @@ public class TypingRace
         winner = null; 
     }
 
+    /**
+     * Prints the winner's name and updated accuracy summary.
+     *
+     * @param oldAccuracy winner's accuracy value before post-race updates
+     */
     private void printWinner(double oldAccuracy)
     {
         System.out.println();
@@ -273,7 +333,6 @@ public class TypingRace
                 int slideBackAmount = random.nextInt(0, SLIDE_BACK_AMOUNT) + 1;
 
                 theTypist.slideBack(slideBackAmount);
-                theTypist.incrementNumberOfMistypes();
             }
 
             // Burnout check — pushing too hard increases burnout risk
@@ -286,6 +345,12 @@ public class TypingRace
         }
     }
 
+    /**
+     * Updates all typist accuracies after a race using outcome and burnout data.
+     * The winner receives a positive outcome score; all others receive a loss score.
+     *
+     * @param typistIterator iterator over all typists whose ratings should be updated
+     */
     private void updateTypistRatings(Iterator<Typist> typistIterator)
     {
         final double SWING_FACTOR = 0.025;
@@ -312,6 +377,16 @@ public class TypingRace
         }
     }
 
+    /**
+     * Calculates a typist's new accuracy after a race.
+     * Applies a swing based on outcome and a burnout penalty, then rounds to 3 d.p.
+     *
+     * @param swingFactor multiplier controlling size of rating adjustments
+     * @param outcome race outcome value (winner: 1.0, loser: 0.0)
+     * @param oldAccuracy typist's previous accuracy
+     * @param numberOfBurnouts number of burnouts incurred during the race
+     * @return updated accuracy value
+     */
     private double calculateNewAccuracy(double swingFactor, double outcome, double oldAccuracy, int numberOfBurnouts)
     {
         final double PENALTY_CONSTANT_FACTOR = 0.075;
@@ -427,11 +502,10 @@ public class TypingRace
             System.out.print(aChar);
         }
     }
-}
 
-class Testing
-{
     public static void main(String[] args) {
+        System.out.println("Welcome to the Typing Race game! \n");
+        
         Scanner scanner = new Scanner(System.in);
         int passage = Utilities.getPassageLength(scanner);
         String choice = "";
@@ -444,5 +518,5 @@ class Testing
             race.startRace(); 
             choice = Utilities.getChoice("Would you like to race again (y/n) - ", scanner);
         }
-    }    
+    }   
 }
