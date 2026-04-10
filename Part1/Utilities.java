@@ -101,11 +101,11 @@ public class Utilities
     {
         char charResponse = '0';
         boolean isChar = false;
-        String response = getUserInput(message, scanner).trim();
+        String response = getUserInput(message, scanner).trim(); // We call trim() to remove any leading or trailing spaces!
 
         while(! isChar)
         {
-            if(response.length() == 1)
+            if(response.length() == 1) // Indicates entered input is a character
             {
                 charResponse = response.charAt(0);
                 isChar = true;
@@ -130,11 +130,11 @@ public class Utilities
     public static String getChoice(String message, Scanner scanner)
     {
         String response = getUserInput(message, scanner);
-        ArrayList<String> validResponses = new ArrayList<>(List.of("Y", "y", "N", "n"));
+        ArrayList<String> validResponses = new ArrayList<>(List.of("Y", "y", "N", "n")); // List of valid responses
 
         while(! validResponses.contains(response))
         {
-            System.out.println("Please respond with either \"Y/y\" or \"N/n\"");     
+            System.out.println("Please respond with either \"Y\" / \"y\" or \"N\" / \"n\"");     
             response = getUserInput(message, scanner);
         }
 
@@ -151,7 +151,7 @@ public class Utilities
     {
         final int LOWER_BOUND = 1;
         final int UPPER_BOUND = 75;
-        int response = getInteger("Please enter the length of the passage (1-75) - ", scanner); 
+        int response = getInteger("Please enter the length of the passage (" + LOWER_BOUND + "-" + UPPER_BOUND + ") - ", scanner); 
         
         while(response < LOWER_BOUND || response > UPPER_BOUND)
         {
