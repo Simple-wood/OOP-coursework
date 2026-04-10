@@ -96,4 +96,21 @@ public class Utilities
 
         return response;
     }
+
+    public static int getPassageLength(Scanner scanner)
+    {
+        final int LOWER_BOUND = 1;
+        final int UPPER_BOUND = 75;
+        int response = getInteger("Please enter the length of the passage (1-75) - ", scanner); 
+        
+        while(response < LOWER_BOUND || response > UPPER_BOUND)
+        {
+            System.out.println("Please enter a passage length that is within the specified range!");
+            response = getInteger("Please enter the length of the passage (1-75) - ", scanner);   
+        }
+
+        System.out.println();
+
+        return response;
+    }
 }
