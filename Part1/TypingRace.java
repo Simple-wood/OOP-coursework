@@ -224,6 +224,7 @@ public class TypingRace
     {
         boolean finished = false;
         Iterator<Typist> typistsIterator = typists.iterator();
+        
         // Reset all typists to the start of the passage 
         resetTypists(typistsIterator);
 
@@ -275,7 +276,7 @@ public class TypingRace
     private void printWinner(double oldAccuracy)
     {
         System.out.println();
-        System.out.println("And the winner is .... " + winner.getName());
+        System.out.println("And the winner is .... " + winner.getName() + "!");
         System.out.println("Final accuracy is: " + winner.getAccuracy() + " (improved from " + oldAccuracy + ")");
     }
 
@@ -317,8 +318,8 @@ public class TypingRace
             }
 
             // Burnout check — pushing too hard increases burnout risk
-            // (probability scales with accuracy squared, capped at ~0.15)
-            if (Math.random() < 0.15 * Math.pow(theTypist.getAccuracy(), 3))
+            // (probability scales with accuracy cubed, capped at ~0.10)
+            if (Math.random() < 0.10 * Math.pow(theTypist.getAccuracy(), 3))
             {
                 theTypist.burnOut(BURNOUT_DURATION);
                 theTypist.incrementNumberOfBurnouts();
@@ -412,7 +413,7 @@ public class TypingRace
     private void printRace()
     {
         System.out.print('\u000C'); // Clear terminal
-        
+
         System.out.println("  TYPING RACE — passage length: " + passageLength + " chars");
         multiplePrint('=', passageLength + 3);
         System.out.println();
