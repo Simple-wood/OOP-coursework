@@ -392,9 +392,11 @@ public class TypingRace
      */
     private void printRace()
     {
-        System.out.print('\u000C'); // Clear terminal
+        // Clear terminal
+        System.out.print("\033[H\033[2J"); 
+        System.out.flush(); 
 
-        System.out.println("  TYPING RACE — passage length: " + passageLength + " chars");
+        System.out.println("\n  TYPING RACE — passage length: " + passageLength + " chars");
         multiplePrint('=', passageLength + 3);
         System.out.println();
 
