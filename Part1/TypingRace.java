@@ -79,32 +79,6 @@ public class TypingRace
             advanceTypist(currentTypist);
         }       
     }
-
-    /**
-     * Checks whether any typist in the iterator has finished the race.
-     * The first finisher encountered is stored as the race winner.
-     *
-     * @param typistsIterator iterator over typists currently in the race
-     * @return true if a winner was found, false otherwise
-     */
-    private boolean checkWinners(Iterator<Typist> typistsIterator)
-    {
-        Typist currentTypist = null;
-
-        while(typistsIterator.hasNext())
-        {
-            currentTypist = typistsIterator.next();
-            boolean winnerAvaliable = raceFinishedBy(currentTypist);
-
-            if(winnerAvaliable && winner == null)
-            {
-                winner = currentTypist;
-                return true;
-            }
-        } 
-
-        return false;
-    }
     
     /**
      * Prints all typist lanes in their current state.
@@ -222,13 +196,12 @@ public class TypingRace
      */
     public void startRace()
     {
-        boolean finished = false;
         Iterator<Typist> typistsIterator = typists.iterator();
         
         // Reset all typists to the start of the passage 
         resetTypists(typistsIterator);
 
-        while (!finished)
+        while (winner == null)
         {
             // Print the current state of the race
             printRace();
@@ -239,7 +212,6 @@ public class TypingRace
 
             // Check if any typist has finished the passage
             typistsIterator = typists.iterator();
-            finished = checkWinners(typistsIterator);
 
             // Wait 200ms between turns so the animation is visible
             try {
@@ -314,6 +286,7 @@ public class TypingRace
 
             if(raceFinishedBy(theTypist)) // If we have finished the race now, there is no need to check for burnouts or mistypes!
             {
+                winner = theTypist;
                 return;
             }
 
