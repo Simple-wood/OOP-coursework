@@ -247,9 +247,16 @@ public class TypingRace
      */
     private void printWinner(double oldAccuracy)
     {
+        String accuracyMessage = "improved"; // Just to indicate if the accuracy has increased or decreased
+
+        if(oldAccuracy > winner.getAccuracy())
+        {
+            accuracyMessage = "decreased";
+        }
+
         System.out.println();
         System.out.println("And the winner is .... " + winner.getName() + "!");
-        System.out.println("Final accuracy is: " + winner.getAccuracy() + " (improved from " + oldAccuracy + ")");
+        System.out.println("Final accuracy is: " + winner.getAccuracy() + " ( " + accuracyMessage + " from " + oldAccuracy + ")");
     }
 
     /**
@@ -477,5 +484,7 @@ public class TypingRace
             race.startRace(); 
             choice = Utilities.getChoice("Would you like to race again (y/n) - ", scanner);
         }
+
+        System.out.println("\nThank you for playing!");
     }   
 }
