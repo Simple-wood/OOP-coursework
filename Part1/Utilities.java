@@ -150,7 +150,7 @@ public class Utilities
     public static int getPassageLength(Scanner scanner)
     {
         final int LOWER_BOUND = 1;
-        final int UPPER_BOUND = 75;
+        final int UPPER_BOUND = 70;
         int response = getInteger("Please enter the length of the passage (" + LOWER_BOUND + "-" + UPPER_BOUND + ") - ", scanner); 
         
         while(response < LOWER_BOUND || response > UPPER_BOUND)
