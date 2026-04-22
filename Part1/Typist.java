@@ -5,7 +5,7 @@
  * who typed with two fingers and considered that "good enough".
  *
  * @author Kishal Chhetri
- * @version 07/04/2026
+ * @version 20/04/2026
  */
 
 public class Typist
