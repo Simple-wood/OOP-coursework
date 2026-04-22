@@ -9,12 +9,10 @@ import java.util.Random;
  * A typing race simulation. Three typists race to complete a passage of text,
  * advancing character by character — or sliding backwards when they mistype.
  *
- * Originally written by Ty Posaurus, who left this project to "focus on his
- * two-finger technique". He assured us the code was "basically done".
- * We have found evidence to the contrary.
+ * Originally written by Ty Posaurus.
  *
- * @author TyPosaurus
- * @version 0.7 (the other 0.3 is left as an exercise for the reader)
+ * @author Kishal Chhetri
+ * @version 1.0
  */
 public class TypingRace
 {
@@ -23,8 +21,7 @@ public class TypingRace
     private Typist winner = null; // Winning typist, null represents that there is no winner as of yet
 
     // Accuracy thresholds for mistype and burnout events
-    // (Ty tuned these values "by feel". They may need adjustment.)
-    private static final double MISTYPE_BASE_CHANCE = 0.2;
+    private static final double MISTYPE_BASE_CHANCE = 0.25;
     private static final int    SLIDE_BACK_AMOUNT = 3; 
     private static final int    BURNOUT_DURATION  = 3; 
 
@@ -42,16 +39,20 @@ public class TypingRace
     }
 
     /**
-     * Seats a typist at the given seat number (1, 2, or 3).
+     * Adds a typist to this race.
      *
-     * @param theTypist  the typist to seat
-     * @param seatNumber the seat to place them in (1–3)
+     * @param theTypist the typist to add
      */
     private void addTypist(Typist theTypist)
     {
         typists.add(theTypist);
     }
 
+    /**
+     * Resets all typists in the given iterator back to their starting state.
+     *
+     * @param typistsIterator iterator over typists currently in the race
+     */
     private void resetTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -63,6 +64,11 @@ public class TypingRace
         }
     }
 
+    /**
+     * Advances each typist in the iterator by one simulated turn.
+     *
+     * @param typistsIterator iterator over typists currently in the race
+     */
     private void advanceTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -73,26 +79,12 @@ public class TypingRace
             advanceTypist(currentTypist);
         }       
     }
-
-    private boolean checkWinners(Iterator<Typist> typistsIterator)
-    {
-        Typist currentTypist = null;
-
-        while(typistsIterator.hasNext())
-        {
-            currentTypist = typistsIterator.next();
-            boolean winnerAvaliable = raceFinishedBy(currentTypist);
-
-            if(winnerAvaliable && winner == null)
-            {
-                winner = currentTypist;
-                return true;
-            }
-        } 
-
-        return false;
-    }
     
+    /**
+     * Prints all typist lanes in their current state.
+     *
+     * @param typistsIterator iterator over typists to print
+     */
     private void printTypists(Iterator<Typist> typistsIterator)
     {
         Typist currentTypist = null;
@@ -105,11 +97,17 @@ public class TypingRace
         } 
     }
 
+    /**
+     * Interactively configures and adds typists for this race.
+     * Ensures names and symbols are unique among all configured typists.
+     *
+     * @param scanner scanner used to read user input
+     */
     public void configureTypists(Scanner scanner)
     {
-        ArrayList<Character> seenTypistSymbols = new ArrayList<>();
-        ArrayList<String> seenTypistNames = new ArrayList<>();
-        String choice = "";
+        ArrayList<Character> seenTypistSymbols = new ArrayList<>(); // Keeps track of typist symbols
+        ArrayList<String> seenTypistNames = new ArrayList<>(); // Keeps track of typist names
+        String choice = ""; // Represents choice ( a yes or no ) for if we want to add another typist or not
         int numberOfTypists = 0;
 
         while(! (choice.equals("N") ||  choice.equals("n"))) // We guarentee at least 1 typist in the simulation
@@ -127,14 +125,22 @@ public class TypingRace
             addTypist(typist);
 
             choice = Utilities.getChoice("Would you like to add another typist (y/n) - ", scanner);
+            System.out.println();
         }
     }
 
+    /**
+     * Prompts the user for a typist symbol and validates uniqueness.
+     *
+     * @param seenSymbols symbols already assigned to existing typists
+     * @param scanner scanner used to read user input
+     * @return a unique symbol for the new typist
+     */
     private char configureSymbol(ArrayList<Character> seenSymbols, Scanner scanner)
     {
         char symbol = Utilities.getCharacter("Please enter a character to represent your typist - ", scanner);
 
-        while(seenSymbols.contains(symbol))
+        while(seenSymbols.contains(symbol)) // We check if there is already a typist with that symbol
         {
             System.out.println("Sorry, that symbol is already taken!");
             symbol = Utilities.getCharacter("Please enter a character to represent your typist - ", scanner);
@@ -143,11 +149,17 @@ public class TypingRace
         return symbol;
     }
 
+    /**
+     * Prompts the user for a typist accuracy and validates range [0.0, 1.0].
+     *
+     * @param scanner scanner used to read user input
+     * @return a valid accuracy value between 0.0 and 1.0 inclusive
+     */
     private double configureAccuracy(Scanner scanner)
     {
         double accuracy = Utilities.getDouble("Please enter an accuracy for your typist (0.0 - 1.0) - ", scanner);
 
-        while(accuracy < 0.0 || accuracy > 1.0)
+        while(accuracy < 0.0 || accuracy > 1.0) // We need to check if the entered accuracy is within the valid range
         {
             System.out.println("You must enter an accuracy between 0.0 and 1.0 inclusive!");
             accuracy = Utilities.getDouble("Please enter an accuracy for your typist (0.0 - 1.0) - ", scanner);
@@ -156,13 +168,19 @@ public class TypingRace
         return accuracy;
     }
 
+    /**
+     * Prompts the user for a typist name and validates uniqueness.
+     *
+     * @param seenNames names already assigned to existing typists
+     * @param scanner scanner used to read user input
+     * @return a unique name for the new typist
+     */
     private String configureName(ArrayList<String> seenNames, Scanner scanner)
     {
         String name =  Utilities.getUserInput("Please enter the name of your typist - ", scanner);
 
-        while(seenNames.contains(name))
+        while(seenNames.contains(name)) // We check if there is already a typist with the specified name
         {
-            System.out.println("hello");
             System.out.println("Sorry, that name is already taken!");
             name = Utilities.getUserInput("Please enter the name of your typist - ", scanner);
         }
@@ -174,18 +192,16 @@ public class TypingRace
      * Starts the typing race.
      * All typists are reset to the beginning, then the simulation runs
      * turn by turn until one typist completes the full passage.
-     *
-     * Note from Ty: "I didn't bother printing the winner at the end,
-     * you can probably figure that out yourself."
+     * The winner and updated winner accuracy are printed at the end.
      */
     public void startRace()
     {
-        boolean finished = false;
         Iterator<Typist> typistsIterator = typists.iterator();
+        
         // Reset all typists to the start of the passage 
         resetTypists(typistsIterator);
 
-        while (!finished)
+        while (winner == null)
         {
             // Print the current state of the race
             printRace();
@@ -196,7 +212,6 @@ public class TypingRace
 
             // Check if any typist has finished the passage
             typistsIterator = typists.iterator();
-            finished = checkWinners(typistsIterator);
 
             // Wait 200ms between turns so the animation is visible
             try {
@@ -211,31 +226,47 @@ public class TypingRace
         endRace(typistsIterator);
     }
 
+    /**
+     * Finalizes the race by updating ratings and announcing the winner.
+     * Resets the winner field afterwards so a new race can begin cleanly.
+     *
+     * @param typistsIterator iterator over all typists in the race
+     */
     private void endRace(Iterator<Typist> typistsIterator)
     {
         double oldWinnerAccuracy = winner.getAccuracy();
         updateTypistRatings(typistsIterator);
         printWinner(oldWinnerAccuracy);
-        winner = null; 
+        winner = null;
     }
 
+    /**
+     * Prints the winner's name and updated accuracy summary.
+     *
+     * @param oldAccuracy winner's accuracy value before post-race updates
+     */
     private void printWinner(double oldAccuracy)
     {
+        String accuracyMessage = "improved"; // Just to indicate if the accuracy has increased or decreased
+
+        if(oldAccuracy > winner.getAccuracy())
+        {
+            accuracyMessage = "decreased";
+        }
+
         System.out.println();
-        System.out.println("And the winner is .... " + winner.getName());
-        System.out.println("Final accuracy is: " + winner.getAccuracy() + " (improved from " + oldAccuracy + ")");
+        System.out.println("And the winner is .... " + winner.getName() + "!");
+        System.out.println("Final accuracy is: " + winner.getAccuracy() + " ( " + accuracyMessage + " from " + oldAccuracy + ")");
     }
 
     /**
      * Simulates one turn for a typist.
      *
-     * If the typist is burnt out, they recover one turn's worth and skip typing.
-     * Otherwise:
-     *   - They may type a character (advancing progress) based on their accuracy.
-     *   - They may mistype (sliding back) — the chance of a mistype should decrease
-     *     for more accurate typists.
-     *   - They may burn out — more likely for very high-accuracy typists
-     *     who are pushing themselves too hard.
+     * If the typist is burnt out, they recover one turn and skip typing.
+     * Otherwise, one of the following can happen:
+     *   - On a successful typing attempt (based on accuracy), progress advances by one.
+     *   - After a successful typing attempt, burnout may occur.
+     *   - On a failed typing attempt, a mistype may occur and cause slide-back.
      *
      * @param theTypist the typist to advance
      */
@@ -255,46 +286,50 @@ public class TypingRace
             theTypist.leaveMistyped();
         }
 
-            // Attempt to type a character
+        // Attempt to type a character
         if (Math.random() < typistAccuracy)
         {
             theTypist.typeCharacter();
 
             if(raceFinishedBy(theTypist)) // If we have finished the race now, there is no need to check for burnouts or mistypes!
             {
+                winner = theTypist;
                 return;
             }
 
-            // Mistype check — the probability should reflect the typist's accuracy
-            
-            if (Math.random() < (1 - typistAccuracy) * MISTYPE_BASE_CHANCE)
-            {
-                Random random = new Random();
-                int slideBackAmount = random.nextInt(0, SLIDE_BACK_AMOUNT) + 1;
-
-                theTypist.slideBack(slideBackAmount);
-                theTypist.incrementNumberOfMistypes();
-            }
-
             // Burnout check — pushing too hard increases burnout risk
-            // (probability scales with accuracy squared, capped at ~0.05)
-            if (Math.random() < (0.05 + (0.05 * Math.pow(typistAccuracy, 2)) * Math.pow(typistAccuracy, 2)))
+            // (probability scales with accuracy cubed, capped at ~0.10)
+            if (Math.random() < 0.10 * Math.pow(theTypist.getAccuracy(), 3))
             {
                 theTypist.burnOut(BURNOUT_DURATION);
                 theTypist.incrementNumberOfBurnouts();
             }
         }
+        
+        // Mistype check — the probability should reflect the typist's accuracy
+        else if (Math.random() < (1 - typistAccuracy) * MISTYPE_BASE_CHANCE)
+        {
+            Random random = new Random();
+            int slideBackAmount = random.nextInt(0, SLIDE_BACK_AMOUNT) + 1;
+
+            theTypist.slideBack(slideBackAmount);
+        }
     }
 
+    /**
+     * Updates all typist accuracies after a race using outcome and burnout data.
+     * The winner receives a positive outcome score; all others receive a loss score.
+     *
+     * @param typistIterator iterator over all typists whose ratings should be updated
+     */
     private void updateTypistRatings(Iterator<Typist> typistIterator)
     {
-        final double SWING_FACTOR = 0.025;
+        final double SWING_FACTOR = 0.025; // Handles how much the accuracy should vary by
         final double WIN_OUTCOME = 1.0;
         final double LOSS_OUTCOME = 0.0;
 
         Typist currentTypist = null;
         
-
         while(typistIterator.hasNext())
         {
             currentTypist = typistIterator.next();
@@ -312,13 +347,23 @@ public class TypingRace
         }
     }
 
+    /**
+     * Calculates a typist's new accuracy after a race.
+     * Applies a swing based on outcome and a burnout penalty, then truncates to 3 d.p.
+     *
+     * @param swingFactor multiplier controlling size of rating adjustments
+     * @param outcome race outcome value (winner: 1.0, loser: 0.0)
+     * @param oldAccuracy typist's previous accuracy
+     * @param numberOfBurnouts number of burnouts incurred during the race
+     * @return updated accuracy value
+     */
     private double calculateNewAccuracy(double swingFactor, double outcome, double oldAccuracy, int numberOfBurnouts)
     {
         final double PENALTY_CONSTANT_FACTOR = 0.075;
         double penalty = PENALTY_CONSTANT_FACTOR * numberOfBurnouts;
         double newAccuracy = oldAccuracy + swingFactor * (outcome - penalty);
 
-        newAccuracy = (int)(newAccuracy * 1000) / 1000.0; // rounding to 3dp
+        newAccuracy = (int)(newAccuracy * 1000) / 1000.0; // Truncating to 3dp
 
         return newAccuracy; 
     }
@@ -331,7 +376,7 @@ public class TypingRace
      */
     private boolean raceFinishedBy(Typist theTypist)
     {
-        if (theTypist.getProgress() >= passageLength)
+        if (theTypist.getProgress() >= passageLength) // If an overshoot were to happen, it is correctly handled
         {
             return true;
         }
@@ -343,14 +388,15 @@ public class TypingRace
 
     /**
      * Prints the current state of the race to the terminal.
-     * Shows each typist's position along the passage, burnout state,
-     * and a WPM estimate based on current progress. (it does not do this)
+     * Shows each typist's position along the passage with burnout and mistype markers.
      */
     private void printRace()
     {
-        System.out.print('\u000C'); // Clear terminal
+        // Clear terminal
+        System.out.print("\033[H\033[2J"); 
+        System.out.flush(); 
 
-        System.out.println("  TYPING RACE — passage length: " + passageLength + " chars");
+        System.out.println("\n  TYPING RACE — passage length: " + passageLength + " chars");
         multiplePrint('=', passageLength + 3);
         System.out.println();
 
@@ -359,18 +405,12 @@ public class TypingRace
 
         multiplePrint('=', passageLength + 3);
         System.out.println();
-        System.out.println("  [~] = burnt out    [<] = just mistyped"); // Should be ~ not zz
+        System.out.println("  [~] = burnt out    [<] = just mistyped"); 
     }
 
     /**
      * Prints a single typist's lane.
-     *
-     * Examples:
-     *   |          ⌨           | TURBOFINGERS (Accuracy: 0.85)
-     *   |    [zz]              | HUNT_N_PECK  (Accuracy: 0.40) BURNT OUT (2 turns)
-     *
-     * Note: Ty forgot to show when a typist has just mistyped. That would
-     * be a nice improvement — perhaps a [<] marker after their symbol.
+     * Uses '~' beside the symbol for burnout and '<' for a recent mistype.
      *
      * @param theTypist the typist whose lane to print
      */
@@ -391,11 +431,14 @@ public class TypingRace
             System.out.print('~');
             spacesAfter--; // symbol + ~ together take two characters
         }
-        // Append < when burnt out so the state is visible without hiding identity.
+
+        // Append < when mistyped so the state is visible without hiding identity.
         else if (theTypist.isMistyped())
         {
+            System.out.print(" ");
             System.out.print('<');
-            spacesAfter--;
+
+            spacesAfter -= 2; // symbol + " " + < together takes three characters
         }
 
         multiplePrint(' ', spacesAfter);
@@ -427,11 +470,10 @@ public class TypingRace
             System.out.print(aChar);
         }
     }
-}
 
-class Testing
-{
     public static void main(String[] args) {
+        System.out.println("Welcome to the Typing Race game! \n");
+        
         Scanner scanner = new Scanner(System.in);
         int passage = Utilities.getPassageLength(scanner);
         String choice = "";
@@ -444,5 +486,7 @@ class Testing
             race.startRace(); 
             choice = Utilities.getChoice("Would you like to race again (y/n) - ", scanner);
         }
-    }    
+
+        System.out.println("\nThank you for playing!");
+    }   
 }

@@ -1,24 +1,15 @@
 /**
  * The Typist class is used to represent individual competitors in the Typing race game. 
  *
- * Starter code generously abandoned by Ty Posaurus, your predecessor,
+ * Starter code generously abandoned by Ty Posaurus, my predecessor,
  * who typed with two fingers and considered that "good enough".
- * He left a sticky note: "the slide-back thing is optional probably".
- * It is not optional. Good luck.
  *
  * @author Kishal Chhetri
- * @version 07/04/2026
+ * @version 20/04/2026
  */
 
 public class Typist
 {
-    // Fields of class Typist
-    // Hint: you will need six fields. Think carefully about their types.
-    // One of them tracks how far along the passage the typist has reached.
-    // Another tracks whether the typist is currently burnt out.
-    // A third tracks HOW MANY turns of burnout remain (not just whether they are burnt out).
-    // The remaining three should be fairly obvious.
-
     private String typistName;
     private char typistSymbol;
     private double typistAccuracy;
@@ -28,7 +19,6 @@ public class Typist
     private int burntOutTurnsRemaining;
 
     private int numberOfBurnouts;
-    private int numberOfMistypes;
 
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
@@ -100,7 +90,6 @@ public class Typist
     /**
      * Returns the typist's current progress through the passage.
      * Progress is measured in characters typed correctly so far.
-     * Note: this value can decrease if the typist mistypes.
      *
      * @return progress as a non-negative integer
      */
@@ -140,14 +129,14 @@ public class Typist
         return burntOutTurnsRemaining;
     }
 
+    /**
+     * Returns how many times this typist burnt out during the current race.
+     *
+     * @return number of burnout events recorded
+     */
     public int getNumberOfBurnouts()
     {
         return numberOfBurnouts;
-    }
-
-    public int getNumberOfMistypes()
-    {
-        return numberOfMistypes;
     }
 
     /**
@@ -158,10 +147,9 @@ public class Typist
     {
         typistProgress = 0;
         burntOut = false;
-        burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
+        burntOutTurnsRemaining = 0; // To entirely clear burnout, burntOutTurnsRemaining must be set to 0
         mistyped = false;
-        numberOfBurnouts = 0;
-        numberOfMistypes = 0;
+        numberOfBurnouts = 0; // Must be reset to 0 to clear burnout
     }
 
     /**
@@ -174,6 +162,11 @@ public class Typist
         return burntOut;  
     }
 
+    /**
+     * Returns true if the typist is currently marked as having just mistyped.
+     *
+     * @return true if currently in the mistyped state
+     */
     public boolean isMistyped()
     {
         return mistyped;
@@ -196,7 +189,7 @@ public class Typist
      */
     public void slideBack(int amount)
     {
-        if(amount <= 0)
+        if(amount <= 0) // If the amount to slide back is <= 0, we do nothing
         {
             return;
         }
@@ -205,12 +198,15 @@ public class Typist
 
         if(typistProgress < minimumProgress)
         {
-            typistProgress = minimumProgress; // Ensures progress cannot go below 0
+            typistProgress = minimumProgress; // progress is clamped to 0 is it goes below 0
         }
 
         mistyped = true;
     }
 
+    /**
+     * Clears the temporary mistyped state marker for this typist.
+     */
     public void leaveMistyped()
     {
         if(mistyped)
@@ -229,11 +225,11 @@ public class Typist
     {
         if(newAccuracy < lowerAccuracyLimit)
         {
-            typistAccuracy = lowerAccuracyLimit;
+            typistAccuracy = lowerAccuracyLimit; // If accuracy is less than 0.0, it is clamped to 0.0
         }
         else if(newAccuracy > upperAccuracyLimit)
         {
-            typistAccuracy = upperAccuracyLimit;
+            typistAccuracy = upperAccuracyLimit; // If accuracy is greater than 1.0, it is clamped to 1.0
         }
         else
         {
@@ -251,13 +247,11 @@ public class Typist
         typistSymbol = newSymbol;
     }
 
+    /**
+     * Increments the burnout counter by one event.
+     */
     public void incrementNumberOfBurnouts()
     {
         numberOfBurnouts++;
-    }
-
-    public void incrementNumberOfMistypes()
-    {
-        numberOfMistypes++;
     }
 }
