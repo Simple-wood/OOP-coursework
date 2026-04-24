@@ -1,12 +1,12 @@
 import javax.swing.*;
-import javax.swing.border.Border;
-
 import java.awt.*;
+import java.util.ArrayList;
 
 public class TypingRaceGUI
 {
     private String passage = null;
     private int typistCount = 0;
+    private int activeTypistCount = 1;
     private TypistSimulation[] typists = null;  
     private CardLayout cards = new CardLayout();
     private JPanel menus = new JPanel(cards);
@@ -21,12 +21,14 @@ public class TypingRaceGUI
         JFrame window = new JFrame("Typing Race Simulator!");
         JPanel menuPanel = PassageMenu();
         JPanel numberPanel = TypistCountMenu();
+        JPanel configureTypistPanel = configureTypistMenu();
 
         menus.add(menuPanel, "MENU");
         menus.add(numberPanel, "NUMBER");
+        menus.add(configureTypistPanel, "CONFIGURE");
         window.add(menus);
 
-        cards.show(menus, "NUMBER");
+        cards.show(menus, "MENU");
 
         window.setSize(300, 300);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,10 +38,7 @@ public class TypingRaceGUI
     private JPanel PassageMenu()
     {
         JPanel container = new JPanel(new BorderLayout());
-
-        JPanel titlePanel = new JPanel();
-        titlePanel.setBackground(Color.WHITE);
-        titlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        addTitle(container);
         JPanel options = new JPanel();
         JPanel radioButtons = new JPanel(new GridBagLayout());
         JPanel content = new JPanel(new BorderLayout());
@@ -48,9 +47,7 @@ public class TypingRaceGUI
         JPanel description = new JPanel(new BorderLayout());
         description.setBackground(Color.WHITE);
 
-        JLabel error = new JLabel("Invalid Input");
-        centerText(error);
-        addLabelPadding(error, 5);
+        JLabel error = createError("Invalid Input!");
 
         JTextArea text = new JTextArea();
         text.setLineWrap(true);
@@ -102,11 +99,6 @@ public class TypingRaceGUI
             refresh(content);
         });
 
-        JLabel title = new JLabel("Kishal's Typing Race Simulator!");
-        centerText(title);
-        addLabelPadding(title, 5);
-        titlePanel.add(title);
-
         JLabel shortDescription = new JLabel("Short: 1-15 characters long!");
         centerText(shortDescription);
         addLabelPadding(shortDescription, 5);
@@ -121,7 +113,6 @@ public class TypingRaceGUI
         description.add(mediumDescription, BorderLayout.CENTER);
         description.add(longDescription, BorderLayout.SOUTH);
         
-        container.add(titlePanel, BorderLayout.NORTH);
         container.add(content, BorderLayout.CENTER);
         container.add(description, BorderLayout.WEST);
         container.add(submit, BorderLayout.SOUTH);
@@ -139,6 +130,7 @@ public class TypingRaceGUI
                 }
                 else{
                    passage = buffer;
+                   cards.show(menus, "NUMBER");
                 }
             }
             else if(content.isAncestorOf(options))
@@ -151,6 +143,7 @@ public class TypingRaceGUI
                 }
                 else{
                     passage = buffer;
+                    cards.show(menus, "NUMBER");
                 }
             }
             else{
@@ -167,18 +160,12 @@ public class TypingRaceGUI
         JPanel container = new JPanel(new BorderLayout());
         JPanel content = new JPanel(new BorderLayout());
         JPanel numberWrapper = new JPanel(new BorderLayout());
-        JPanel titleWrapper = new JPanel();
-        JLabel title = new JLabel("Kishal's Typing Race Simulator!");
+        addTitle(container);
+        JLabel error = createError("Invalid Input!");
+
         JButton submit = new JButton("Submit number of typists");
 
-        centerText(title);
-        addLabelPadding(title, 5);
-        titleWrapper.add(title);
-        titleWrapper.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
-        titleWrapper.setBackground(Color.white);
-        container.add(titleWrapper, BorderLayout.NORTH);
-
-        JLabel numberText = new JLabel("Please enter the number of typists you would like - ");
+        JLabel numberText = new JLabel("Please enter the number of typists you would like (2-6) - ");
         centerText(numberText);
         addLabelPadding(numberText, 5);
         content.add(numberText, BorderLayout.NORTH);
@@ -187,10 +174,173 @@ public class TypingRaceGUI
         numberWrapper.add(numberInput, BorderLayout.NORTH);
         addPanelPadding(numberWrapper, 15);
 
+        submit.addActionListener(e -> {
+            String response = numberInput.getText();
+
+            if(HelperUtilities.isNumber(response))
+            {
+                int integerResponse = Integer.parseInt(response);
+
+                if(integerResponse >= 2 && integerResponse <= 6)
+                {
+                    typistCount = integerResponse;
+                    cards.show(menus, "CONFIGURE");
+                }
+                else{
+                    content.add(error, BorderLayout.SOUTH);
+                    refresh(content);             
+                }
+
+            }
+            else{
+                content.add(error, BorderLayout.SOUTH);
+                refresh(content);
+            }
+        });
+
         content.add(numberWrapper, BorderLayout.CENTER);
         container.add(content, BorderLayout.CENTER);
+        container.add(submit, BorderLayout.SOUTH);
 
         return container;
+    }
+
+    private JPanel configureTypistMenu()
+    {
+        ArrayList<String> usedNames = new ArrayList<>();
+        ArrayList<Character> usedSymbols = new ArrayList<>();
+
+        JPanel container = new JPanel(new BorderLayout());
+        addTitle(container);
+        JPanel content = new JPanel(new BorderLayout());
+        JPanel input = new JPanel();
+        JLabel typistInfo = new JLabel("Typist no. " + activeTypistCount);
+        addLabelPadding(typistInfo, 10);
+
+        input.setLayout(new BoxLayout(input, BoxLayout.Y_AXIS));
+
+        JLabel nameLabel =  new JLabel("Please enter the name of your typist - ");
+        addLabelPadding(nameLabel, 10);
+        JTextField typistName = new JTextField();
+
+        JLabel symbolLabel =  new JLabel("Please enter the symbol of your typist - ");
+        addLabelPadding(symbolLabel, 10);
+        JTextField typistSymbol= new JTextField();
+
+        JLabel accuracyLabel =  new JLabel("Please enter the accuracy of your typist (0-1) - ");
+        addLabelPadding(accuracyLabel, 10);
+        JTextField typistAccuracy = new JTextField();
+
+        JButton submit = new JButton("Add typist");
+        JLabel invalidInputError = createError("Invalid Input!");
+        JLabel existingError = createError("There is an already existing typist registered with that name or symbol!");
+
+        input.add(nameLabel);
+        input.add(typistName);
+        input.add(symbolLabel);
+        input.add(typistSymbol);
+        input.add(accuracyLabel);
+        input.add(typistAccuracy);
+
+        JScrollPane scrollInput = new JScrollPane(input);
+        content.add(scrollInput, BorderLayout.CENTER);
+        content.add(typistInfo, BorderLayout.NORTH);
+
+        submit.addActionListener(e -> {
+            String name = typistName.getText();
+            String symbol = typistSymbol.getText();
+            String accuracy = typistAccuracy.getText();
+            
+            if(validTypistFields(name, symbol, accuracy))
+            {
+                Double dAccuracy = Double.parseDouble(accuracy);
+                char cSymbol = symbol.charAt(0);
+
+                if(! usedNames.contains(name) && ! usedSymbols.contains(cSymbol))
+                {
+                    usedNames.add(name);
+                    usedSymbols.add(cSymbol);
+
+                    if(content.isAncestorOf(invalidInputError))
+                    {
+                        content.remove(invalidInputError);
+                    }
+                    else if(content.isAncestorOf(existingError))
+                    {
+                        content.remove(existingError);
+                    }
+
+                    activeTypistCount++;
+                    typistInfo.setText("Typist no. " + activeTypistCount);
+                    typistName.setText("");
+                    typistAccuracy.setText("");
+                    typistSymbol.setText("");
+                    
+                    refresh(content);
+                }
+                else{
+                    if(content.isAncestorOf(invalidInputError))
+                    {
+                        content.remove(invalidInputError);
+                    }
+
+                    content.add(existingError, BorderLayout.SOUTH);
+                    refresh(content);
+                }
+            }
+            else{
+                if(content.isAncestorOf(existingError))
+                {
+                    content.remove(existingError);
+                }
+                content.add(invalidInputError, BorderLayout.SOUTH);
+                refresh(content);               
+            }
+        });
+
+        container.add(content, BorderLayout.CENTER);
+        container.add(submit, BorderLayout.SOUTH);
+
+        return container;
+    }
+
+    private boolean validTypistFields(String name, String symbol, String accuracy)
+    {
+        if(name.trim().isEmpty() || !HelperUtilities.isChar(symbol) || !HelperUtilities.isDouble(accuracy))
+        {
+            return false;
+        }
+
+        double dAccuracy = Double.parseDouble(accuracy);
+        if(dAccuracy < 0 || dAccuracy > 1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void addTitle(JPanel container)
+    {
+        JPanel titleWrapper = new JPanel();
+        JLabel title = new JLabel("Kishal's Typing Race Simulator!");
+
+        centerText(title);
+        addLabelPadding(title, 5);
+        titleWrapper.add(title);
+        titleWrapper.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        titleWrapper.setBackground(Color.white);
+        container.add(titleWrapper, BorderLayout.NORTH);
+    }
+
+    private JLabel createError(String errorMessage)
+    {
+        JLabel error = new JLabel(errorMessage);
+        centerText(error);
+        addLabelPadding(error, 5);
+        error.setForeground(Color.RED); 
+        
+        return error;
     }
 
     private void refresh(JFrame window)
