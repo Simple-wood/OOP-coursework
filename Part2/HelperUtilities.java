@@ -1,3 +1,6 @@
+import javax.swing.*;
+import java.awt.*;
+
 public class HelperUtilities
 {
     public static boolean isNumber(String text)
@@ -38,5 +41,56 @@ public class HelperUtilities
         }
 
         return false;
+    }
+
+    public static void addTitle(JPanel container)
+    {
+        JPanel titleWrapper = new JPanel();
+        JLabel title = new JLabel("Kishal's Typing Race Simulator!");
+
+        centerText(title);
+        addLabelPadding(title, 5);
+        titleWrapper.add(title);
+        titleWrapper.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        titleWrapper.setBackground(Color.white);
+        container.add(titleWrapper, BorderLayout.NORTH);
+    }
+
+    public static JLabel createError(String errorMessage)
+    {
+        JLabel error = new JLabel(errorMessage);
+        centerText(error);
+        addLabelPadding(error, 5);
+        error.setForeground(Color.RED); 
+        
+        return error;
+    }
+
+    public static void refresh(JFrame window)
+    {
+        window.revalidate();
+        window.repaint();
+    }
+
+    public static void refresh(JPanel panel)
+    {
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    public static void centerText(JLabel label)
+    {
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setVerticalAlignment(JLabel.CENTER);
+    }
+
+    public static void addPanelPadding(JPanel panel, int size)
+    {
+        panel.setBorder(BorderFactory.createEmptyBorder(size, size, size, size));
+    }
+
+    public static void addLabelPadding(JLabel label, int size)
+    {
+        label.setBorder(BorderFactory.createEmptyBorder(size, size, size, size));
     }
 }
