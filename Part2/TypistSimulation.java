@@ -28,7 +28,6 @@ public class TypistSimulation
     private int burntOutTurnsRemaining;
 
     private int numberOfBurnouts;
-    private int numberOfMistypes;
 
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
@@ -145,10 +144,6 @@ public class TypistSimulation
         return numberOfBurnouts;
     }
 
-    public int getNumberOfMistypes()
-    {
-        return numberOfMistypes;
-    }
 
     /**
      * Resets the typist to their initial state, ready for a new race.
@@ -161,7 +156,6 @@ public class TypistSimulation
         burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
         mistyped = false;
         numberOfBurnouts = 0;
-        numberOfMistypes = 0;
     }
 
     /**
@@ -254,10 +248,5 @@ public class TypistSimulation
     public void incrementNumberOfBurnouts()
     {
         numberOfBurnouts++;
-    }
-
-    public void incrementNumberOfMistypes()
-    {
-        numberOfMistypes++;
     }
 }
