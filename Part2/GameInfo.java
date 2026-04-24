@@ -1,8 +1,10 @@
+import java.util.ArrayList;
+
 public class GameInfo
 {
     private String passage;
     private int numberOfTypists;
-    private TypistSimulation[] typists;
+    private ArrayList<TypistSimulation> typists;
     private boolean autoCorrectMode = false;
     private boolean caffeineMode = false;
     private boolean nightMode = false;
@@ -27,12 +29,12 @@ public class GameInfo
         numberOfTypists = amount;
     }
 
-    public TypistSimulation[] getTypists()
+    public ArrayList<TypistSimulation> getTypists()
     {
         return typists;
     }
 
-    public void setTypists(TypistSimulation[] typistsArray)
+    public void setTypists(ArrayList<TypistSimulation> typistsArray)
     {
         typists = typistsArray;
     }
