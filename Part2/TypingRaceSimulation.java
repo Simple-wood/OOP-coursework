@@ -153,9 +153,13 @@ public class TypingRaceSimulation
             }
         }
 
-        if((int) turns / typists.size() == 10)
+        if(globalModes[1])
         {
-            updateTypistIncrements(1);
+            if((int) turns / typists.size() == 10)
+            {
+                updateTypistIncrements(1);
+                burnout_duration = 5; // Increased burnout risk now -> burn out duration lasts longer!
+            }
         }
     }
 
