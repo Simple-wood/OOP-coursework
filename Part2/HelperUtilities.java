@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+
 import java.awt.*;
 
 public class HelperUtilities
@@ -92,5 +94,24 @@ public class HelperUtilities
     public static void addLabelPadding(JLabel label, int size)
     {
         label.setBorder(BorderFactory.createEmptyBorder(size, size, size, size));
+    }
+
+    public static void addTextAreaPadding(JTextArea area, int size)
+    {
+        area.setBorder(BorderFactory.createEmptyBorder(size, size, size, size));
+    }
+
+    public static void addTextFieldPadding(JTextField area, int size)
+    {
+        area.setBorder(BorderFactory.createEmptyBorder(size, size, size, size));
+    }
+
+    public static void addTitleBorder(JPanel panel, String title)
+    {
+        TitledBorder titleBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), title);
+        titleBorder.setTitleJustification(TitledBorder.LEFT);
+        titleBorder.setTitlePosition(TitledBorder.TOP);
+
+        panel.setBorder(titleBorder);
     }
 }
