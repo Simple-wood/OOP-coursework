@@ -16,14 +16,16 @@ import java.lang.Math;
 public class TypingRaceSimulation
 {
     private int passageLength;   // Total characters in the passage to type
+    private int turns = 0;
     private ArrayList<TypistSimulation> typists;
     private TypistSimulation winner = null;
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
-    private static  double mistype_base_chance = 0.3;
-    private static  int slide_back_amount = 2; 
-    private static int burnout_duration = 3; 
+    private double mistype_base_chance = 0.3;
+    private int slide_back_amount = 2; 
+    private int burnout_duration = 3; 
+    private boolean[] globalModes; // [autocorrect, caffeine night]
 
     /**
      * Constructor for objects of class TypingRace.
@@ -32,14 +34,35 @@ public class TypingRaceSimulation
      *
      * @param passageLength the number of characters in the passage to type
      */
-    public TypingRaceSimulation(int passageLength, ArrayList<TypistSimulation> typists)
+    public TypingRaceSimulation(int passageLength, ArrayList<TypistSimulation> typists, boolean[] modes)
     {
         this.passageLength = passageLength;
         this.typists = typists;
+        this.globalModes = modes;
     }
 
-    private void resetTypists(Iterator<TypistSimulation> typistsIterator)
+    public void configureGame()
     {
+        if(globalModes[0])
+        {
+            slide_back_amount = slide_back_amount / 2;
+        }
+
+        if(globalModes[1])
+        {
+            updateTypistIncrements(3);
+        }
+
+        if(globalModes[2])
+        {
+            updateTypistAccuracy(0.05);
+        }
+    }
+
+
+    private void resetTypists()
+    { 
+        Iterator<TypistSimulation> typistsIterator = typists.iterator();
         TypistSimulation currentTypist = null;
 
         while(typistsIterator.hasNext())
@@ -49,16 +72,28 @@ public class TypingRaceSimulation
         }
     }
 
-    public void advanceTypists()
+    private void updateTypistIncrements(int amount)
     {
-        TypistSimulation currentTypist = null;
         Iterator<TypistSimulation> typistsIterator = typists.iterator();
+        TypistSimulation currentTypist = null;
 
         while(typistsIterator.hasNext())
         {
             currentTypist = typistsIterator.next();
-            advanceTypist(currentTypist);
-        }       
+            currentTypist.setTypeIncrement(amount);
+        }
+    }
+
+    private void updateTypistAccuracy(double decreaseAmount)
+    {
+        Iterator<TypistSimulation> typistsIterator = typists.iterator();
+        TypistSimulation currentTypist = null;
+
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+            currentTypist.setAccuracy(currentTypist.getAccuracy() - decreaseAmount);
+        }
     }
   
 
@@ -77,6 +112,7 @@ public class TypingRaceSimulation
      */
     public void advanceTypist(TypistSimulation theTypist)
     { 
+        turns++;
         double typistAccuracy = theTypist.getAccuracy();
 
         if (theTypist.isBurntOut())
@@ -115,6 +151,11 @@ public class TypingRaceSimulation
                 theTypist.burnOut(burnout_duration);
                 theTypist.incrementNumberOfBurnouts();
             }
+        }
+
+        if((int) turns / typists.size() == 10)
+        {
+            updateTypistIncrements(1);
         }
     }
 
