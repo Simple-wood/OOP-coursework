@@ -1,3 +1,5 @@
+import java.awt.*;
+
 /**
  * The Typist class is used to represent individual competitors in the Typing race game. 
  *
@@ -34,6 +36,15 @@ public class TypistSimulation
     private final int MINIMUM_PROGRESS = 0; // Progress cannot go below 0
     private int typeIncrement = 1;
 
+    private String typingStyle = null;
+    private String keyboard = null;
+    private Color colour;
+    private boolean[] accessories;
+
+    private double mistypeBaseChance = 0.3;
+    private double burnoutChanceCap = 0.05;
+    private int burnoutDuration = 3;
+
     // Constructor of class Typist
     /**
      * Constructor for objects of class Typist.
@@ -43,10 +54,15 @@ public class TypistSimulation
      * @param typistName    the name of the typist (e.g. "TURBOFINGERS")
      * @param typistAccuracy the typist's accuracy rating, between 0.0 and 1.0
      */ 
-    public TypistSimulation(char typistSymbol, String typistName, double typistAccuracy)
+    public TypistSimulation(char typistSymbol, String typistName, double typistAccuracy, String typingStyle, String keyboard, 
+        Color colour, boolean[] accessories)
     {
         this.typistSymbol = typistSymbol;
         this.typistName = typistName;
+        this.typingStyle = typingStyle;
+        this.keyboard = keyboard;
+        this.colour = colour;
+        this.accessories = accessories;
         setAccuracy(typistAccuracy);
         resetToStart();
     }
@@ -180,6 +196,8 @@ public class TypistSimulation
     public void typeCharacter()
     {
         typistProgress += typeIncrement;
+
+
     }
 
     /**
@@ -253,5 +271,89 @@ public class TypistSimulation
     public void setTypeIncrement(int increment)
     {
         typeIncrement = increment;
+    }
+
+    public void configureTypist()
+    {
+        if(typingStyle.equals("Touch Typist"))
+        {
+            setAccuracy(getAccuracy() * 1.1);
+            burnoutChanceCap = 0.12;
+        }
+        else if(typingStyle.equals("Hunt & Peck"))
+        {
+            setAccuracy(getAccuracy() * 1.2);
+            burnoutDuration = 2;
+        }
+        else if(typingStyle.equals("Phone Thumbs"))
+        {
+            setAccuracy(getAccuracy() * 0.9);
+            burnoutChanceCap = 0.02;
+        }  
+        else if(typingStyle.equals("Voice-to-Text"))
+        {
+            setAccuracy(getAccuracy() * 0.7);
+            burnoutDuration = 5;
+        } 
+
+        if(keyboard.equals("Mechanical"))
+        {
+            typeIncrement = 3;
+            mistypeBaseChance = 0.4;
+        }
+        else if(keyboard.equals("Membrane"))
+        {
+            typeIncrement = 2;
+            mistypeBaseChance = 0.35;
+        }
+        else if(keyboard.equals("Touchscreen"))
+        {
+            mistypeBaseChance = 0.2;
+        }
+        else if(keyboard.equals("Stenography"))
+        {
+            typeIncrement = 5;
+            mistypeBaseChance = 0.6;
+        }
+
+        if(accessories[0])
+        {
+            burnoutDuration = (int) (burnoutDuration / 2);
+        }
+
+        if(accessories[2])
+        {
+            mistypeBaseChance = mistypeBaseChance / 2;
+        }
+    }
+
+    public double getMistypeBaseChance()
+    {
+        return mistypeBaseChance;
+    }
+
+    public double getBurnoutChanceCap()
+    {
+        return burnoutChanceCap;
+    }
+
+    public int getTypeIncrement()
+    {
+        return typeIncrement;
+    }
+
+    public int getBurnoutDuration()
+    {
+        return burnoutDuration;
+    }
+
+    public boolean hasEnergyDrink()
+    {
+        return accessories[1];
+    }
+
+    public Color getColour()
+    {
+        return colour;
     }
 }
