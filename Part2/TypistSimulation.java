@@ -193,11 +193,14 @@ public class TypistSimulation
      * Advances the typist forward by one character along the passage.
      * Should only be called when the typist is not burnt out.
      */
-    public void typeCharacter()
+    public void typeCharacter(int passageLength)
     {
         typistProgress += typeIncrement;
 
-
+        if(typistProgress > passageLength)
+        {
+            typistProgress = passageLength;
+        }
     }
 
     /**
