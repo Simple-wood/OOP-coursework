@@ -31,7 +31,8 @@ public class TypistSimulation
 
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
-    private final int minimumProgress = 0; // Progress cannot go below 0
+    private final int MINIMUM_PROGRESS = 0; // Progress cannot go below 0
+    private int typeIncrement = 1;
 
     // Constructor of class Typist
     /**
@@ -144,7 +145,6 @@ public class TypistSimulation
         return numberOfBurnouts;
     }
 
-
     /**
      * Resets the typist to their initial state, ready for a new race.
      * Progress returns to zero, burnout is cleared entirely.
@@ -179,7 +179,7 @@ public class TypistSimulation
      */
     public void typeCharacter()
     {
-        typistProgress++;
+        typistProgress += typeIncrement;
     }
 
     /**
@@ -197,9 +197,9 @@ public class TypistSimulation
         
         typistProgress -= amount;
 
-        if(typistProgress < minimumProgress)
+        if(typistProgress < MINIMUM_PROGRESS)
         {
-            typistProgress = minimumProgress; // Ensures progress cannot go below 0
+            typistProgress = MINIMUM_PROGRESS; // Ensures progress cannot go below 0
         }
 
         mistyped = true;
@@ -248,5 +248,10 @@ public class TypistSimulation
     public void incrementNumberOfBurnouts()
     {
         numberOfBurnouts++;
+    }
+
+    public void setTypeIncrement(int increment)
+    {
+        typeIncrement = increment;
     }
 }
