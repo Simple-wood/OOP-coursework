@@ -352,6 +352,11 @@ public class TypistSimulation
         return burnoutDuration;
     }
 
+    public void setBurnoutDuration(int amount)
+    {
+        burnoutDuration = amount;
+    }
+
     public boolean hasEnergyDrink()
     {
         return accessories[1];
