@@ -254,6 +254,8 @@ public class TypistSimulation
         {
             typistAccuracy = newAccuracy;
         }
+
+        typistAccuracy = ((int)(typistAccuracy * 1000)) / 1000.0;
     }
 
     /**
