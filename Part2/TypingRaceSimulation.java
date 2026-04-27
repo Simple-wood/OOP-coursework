@@ -22,9 +22,7 @@ public class TypingRaceSimulation
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
-    private double mistype_base_chance = 0.3;
     private int slide_back_amount = 2; 
-    private int burnout_duration = 3; 
     private boolean[] globalModes; // [autocorrect, caffeine night]
 
     /**
@@ -169,7 +167,7 @@ public class TypingRaceSimulation
             if((int) (turns / typists.size()) == 10)
             {
                 updateTypistIncrements(1);
-                burnout_duration = 5; // Increased burnout risk now -> burn out duration lasts longer!
+                theTypist.setBurnoutDuration(theTypist.getBurnoutDuration() + 2); // Increased burnout risk now -> burn out duration lasts longer!
             }
         }
 
