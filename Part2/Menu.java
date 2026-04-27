@@ -1,10 +1,12 @@
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Menu
 {
-    protected JPanel container = new JPanel(new BorderLayout());
+    protected JPanel container = new JPanel(new BorderLayout(25, 5));
     private GameInfo gameInformation;
 
     public Menu(GameInfo gameInformation)
@@ -36,6 +38,17 @@ class PassageMenu extends Menu
         JPanel options = new JPanel();
         JPanel radioButtons = new JPanel(new GridBagLayout());
         JPanel content = new JPanel(new BorderLayout());
+        JPanel contentWrapper = new JPanel(new BorderLayout());
+        JPanel checkPanel = new JPanel(new FlowLayout());
+        JPanel typistNumberPanel = new JPanel(new BorderLayout());
+
+        JCheckBox autoCorrect = new JCheckBox("Autocorrect mode");
+        JCheckBox caffeine = new JCheckBox("Caffeine mode");
+        JCheckBox night = new JCheckBox("Night mode");
+        checkPanel.add(autoCorrect);
+        checkPanel.add(caffeine);
+        checkPanel.add(night);
+        
         HelperUtilities.addPanelPadding(content, 25);
 
         JPanel description = new JPanel(new BorderLayout());
@@ -46,6 +59,17 @@ class PassageMenu extends Menu
         JTextArea text = new JTextArea();
         text.setLineWrap(true);
         JScrollPane scrollText = new JScrollPane(text);
+
+        JSpinner typistCount = new JSpinner(new SpinnerNumberModel(2, 2, 6, 1));
+        JSpinner.DefaultEditor spinnerEditor = (JSpinner.DefaultEditor) typistCount.getEditor();
+        spinnerEditor.getTextField().setHorizontalAlignment(JTextField.CENTER);
+        HelperUtilities.addTextFieldPadding(spinnerEditor.getTextField(), 15);
+
+        JLabel paddingLabel = new JLabel("                                    ");
+        HelperUtilities.addLabelPadding(paddingLabel, 15);
+        HelperUtilities.addTitleBorder(typistNumberPanel, "Seat Count");
+        typistNumberPanel.add(typistCount, BorderLayout.NORTH);
+        typistNumberPanel.add(paddingLabel, BorderLayout.SOUTH);
 
         JButton submit = new JButton("Submit passage");
         JRadioButton preMade = new JRadioButton("Choose from a list of pre-defined passages?");
@@ -93,6 +117,12 @@ class PassageMenu extends Menu
             HelperUtilities.refresh(content);
         });
 
+        HelperUtilities.addTitleBorder(content, "Select Passage");
+        HelperUtilities.addTitleBorder(checkPanel, "Difficulty Modifiers");
+
+        contentWrapper.add(checkPanel, BorderLayout.SOUTH);
+        contentWrapper.add(content, BorderLayout.CENTER);
+
         JLabel shortDescription = new JLabel("Short: 1-15 characters long!");
         HelperUtilities.centerText(shortDescription);
         HelperUtilities.addLabelPadding(shortDescription, 5);
@@ -107,8 +137,8 @@ class PassageMenu extends Menu
         description.add(mediumDescription, BorderLayout.CENTER);
         description.add(longDescription, BorderLayout.SOUTH);
         
-        container.add(content, BorderLayout.CENTER);
-        container.add(description, BorderLayout.WEST);
+        container.add(contentWrapper, BorderLayout.CENTER);
+        container.add(typistNumberPanel, BorderLayout.WEST);
         container.add(submit, BorderLayout.SOUTH);
 
         submit.addActionListener(e ->{
@@ -125,7 +155,23 @@ class PassageMenu extends Menu
                 }
                 else{
                    gameInformation.setPassage(buffer);
-                   System.out.println(gameInformation.getPassage());
+                   gameInformation.setNumberOfTypists((int) typistCount.getValue());
+
+                   if(autoCorrect.isSelected())
+                   {
+                        gameInformation.activateAutoCorrect();
+                   }
+
+                   if(caffeine.isSelected())
+                   {
+                        gameInformation.activateCaffeine();
+                   }
+
+                   if(night.isSelected())
+                   {
+                        gameInformation.activateNight();
+                   }
+
                    cards.show(menus, nextMenu);
                 }
             }
@@ -139,6 +185,23 @@ class PassageMenu extends Menu
                 }
                 else{
                     gameInformation.setPassage(buffer);
+                    gameInformation.setNumberOfTypists((int) typistCount.getValue());
+
+                   if(autoCorrect.isSelected())
+                   {
+                        gameInformation.activateAutoCorrect();
+                   }
+
+                   if(caffeine.isSelected())
+                   {
+                        gameInformation.activateCaffeine();
+                   }
+
+                   if(night.isSelected())
+                   {
+                        gameInformation.activateNight();
+                   }
+
                     cards.show(menus, nextMenu);
                 }
             }
@@ -147,65 +210,6 @@ class PassageMenu extends Menu
                 HelperUtilities.refresh(content);
             }
         });
-
-        return container;
-    }
-}
-
-class TypistCountMenu extends Menu
-{
-    public TypistCountMenu(GameInfo gameInformation)
-    {
-        super(gameInformation);
-    }
-
-    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu)
-    {
-        JPanel container = new JPanel(new BorderLayout());
-        JPanel content = new JPanel(new BorderLayout());
-        JPanel numberWrapper = new JPanel(new BorderLayout());
-        HelperUtilities.addTitle(container);
-        JLabel error = HelperUtilities.createError("Invalid Input!");
-
-        JButton submit = new JButton("Submit number of typists");
-
-        JLabel numberText = new JLabel("Please enter the number of typists you would like (2-6) - ");
-        HelperUtilities.centerText(numberText);
-        HelperUtilities.addLabelPadding(numberText, 5);
-        content.add(numberText, BorderLayout.NORTH);
-
-        JTextField numberInput = new JTextField();
-        numberWrapper.add(numberInput, BorderLayout.NORTH);
-        HelperUtilities.addPanelPadding(numberWrapper, 15);
-
-        submit.addActionListener(e -> {
-            String response = numberInput.getText();
-            GameInfo information = getGameInfo();
-
-            if(HelperUtilities.isNumber(response))
-            {
-                int integerResponse = Integer.parseInt(response);
-
-                if(integerResponse >= 2 && integerResponse <= 6)
-                {
-                    information.setNumberOfTypists(integerResponse);
-                    cards.show(menus, nextMenu);
-                }
-                else{
-                    content.add(error, BorderLayout.SOUTH);
-                    HelperUtilities.refresh(content);             
-                }
-
-            }
-            else{
-                content.add(error, BorderLayout.SOUTH);
-                HelperUtilities.refresh(content);
-            }
-        });
-
-        content.add(numberWrapper, BorderLayout.CENTER);
-        container.add(content, BorderLayout.CENTER);
-        container.add(submit, BorderLayout.SOUTH);
 
         return container;
     }
@@ -217,6 +221,7 @@ class AddTypistMenu extends Menu
     private ArrayList<String> usedNames = new ArrayList<>();
     private ArrayList<Character> usedSymbols = new ArrayList<>();
     private ArrayList<TypistSimulation> typists = new ArrayList<>();
+    private Timer timer;
 
     public AddTypistMenu(GameInfo gameInformation)
     {
@@ -225,39 +230,108 @@ class AddTypistMenu extends Menu
 
     public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu)
     {
-        GameInfo information = getGameInfo();
-
-        JPanel container = new JPanel(new BorderLayout());
+        GameInfo gameInformation = getGameInfo();
         HelperUtilities.addTitle(container);
         JPanel content = new JPanel(new BorderLayout());
         JPanel input = new JPanel();
         JLabel typistInfo = new JLabel("Typist no. " + (currentNumberOfTypists + 1));
-        HelperUtilities.addLabelPadding(typistInfo, 10);
+        JLabel filler = new JLabel("                  ");
+        HelperUtilities.addLabelPadding(typistInfo, 5);
 
         input.setLayout(new BoxLayout(input, BoxLayout.Y_AXIS));
 
-        JLabel nameLabel =  new JLabel("Please enter the name of your typist - ");
-        HelperUtilities.addLabelPadding(nameLabel, 10);
+        JPanel namePanel = new JPanel(new BorderLayout());
+        HelperUtilities.addTitleBorder(namePanel, "Enter Typist Name");
         JTextField typistName = new JTextField();
+        namePanel.add(typistName, BorderLayout.CENTER);
 
-        JLabel symbolLabel =  new JLabel("Please enter the symbol of your typist - ");
-        HelperUtilities.addLabelPadding(symbolLabel, 10);
-        JTextField typistSymbol= new JTextField();
+        JPanel symbolPanel = new JPanel(new BorderLayout());
+        HelperUtilities.addTitleBorder(symbolPanel, "Enter Typist Symbol");
+        JTextField typistSymbol = new JTextField();
+        symbolPanel.add(typistSymbol, BorderLayout.CENTER);
 
-        JLabel accuracyLabel =  new JLabel("Please enter the accuracy of your typist (0-1) - ");
-        HelperUtilities.addLabelPadding(accuracyLabel, 10);
+        JPanel colourPanel = new JPanel(new BorderLayout());
+        HelperUtilities.addTitleBorder(colourPanel, "Choose Colour");
+        JButton colourButton = new JButton(" ");
+        colourButton.setBackground(Color.GREEN);
+        colourPanel.add(filler, BorderLayout.SOUTH);
+        colourPanel.add(colourButton, BorderLayout.CENTER);
+
+        colourButton.addActionListener(e ->{
+            Color chosenColour = JColorChooser.showDialog(null, "Choose Colour", Color.GREEN);
+
+            if(chosenColour != null)
+            {
+                colourButton.setBackground(chosenColour);
+            }
+        });
+
+        JPanel accuracyPanel = new JPanel(new BorderLayout());
+        HelperUtilities.addTitleBorder(accuracyPanel, "Enter Typist Accuracy (0 - 1)");
         JTextField typistAccuracy = new JTextField();
+        accuracyPanel.add(typistAccuracy, BorderLayout.CENTER);
+
+        JPanel typingStylePanel = new JPanel(new BorderLayout());
+        JTextArea typingStyleInfo = new JTextArea("Touch Typist - 1.1x accuracy, burnout chance cap lifted to 12%" + 
+                "\nHunt & Peck - 1.2x accuracy, burnout duration decreased to 2 turns" +
+                "\nPhone Thumbs - 0.9x accuracy, burnout chance cap decreased tp 2%" + 
+                "\nVoice-to-Text - 0.7x accuracy, burnout duration increased to 5 turns");
+
+        typingStyleInfo.setEditable(false);
+        HelperUtilities.addTextAreaPadding(typingStyleInfo, 10);
+
+        HelperUtilities.addTitleBorder(typingStylePanel, "Select Typing Style");
+        String[] typingStyles = {"None", "Touch Typist", "Hunt & Peck", "Phone Thumbs", "Voice-to-Text"};
+        JComboBox<String> typingStyleOptions = new JComboBox<>(typingStyles);
+        typingStylePanel.add(typingStyleOptions, BorderLayout.CENTER);
+        typingStylePanel.add(typingStyleInfo, BorderLayout.SOUTH);
+
+        JPanel keyboardPanel = new JPanel(new BorderLayout());
+        JTextArea keyboardInfo = new JTextArea("Mechanical - 3x typing speed, mistype chance cap lifted to 40%" +
+            "\nMembrane - 2x typing speed, mistype chance cap lifted to 35%" +
+            "\nTouchscreem - mistype chance cap decreased to 20%" +
+            "\nStenography - 5x typing speed, mistype chance cap lifed to 60%");
+        
+        keyboardInfo.setEditable(false);
+        HelperUtilities.addTextAreaPadding(keyboardInfo, 10);
+
+        HelperUtilities.addTitleBorder(keyboardPanel, "Select Keyboard");
+        String[] keyboards = {"None", "Mechanical", "Membrane", "Touchscreen", "Stenography"};
+        JComboBox<String> keyboardOptions = new JComboBox<>(keyboards);
+        keyboardPanel.add(keyboardOptions, BorderLayout.CENTER);
+        keyboardPanel.add(keyboardInfo, BorderLayout.SOUTH);
+
+        JPanel accessories = new JPanel(new BorderLayout());
+        JPanel checkButtons = new JPanel(new FlowLayout());
+        JTextArea accessoriesInfo = new JTextArea("Wrist Support - 0.5x burnout duration" +
+            "\nEnergy Drink - 2x original accuracy for first 15 turns, 0.5x accuracy afterwards" +
+            "\nHeadPhones - 0.5x the mistype chance cap");
+
+        accessoriesInfo.setEditable(false);
+        HelperUtilities.addTextAreaPadding(accessoriesInfo, 10);
+
+        HelperUtilities.addTitleBorder(accessories, "Select Accessories");
+        JCheckBox wristSupport = new JCheckBox("Wrist Support");
+        JCheckBox energyDrink = new JCheckBox("Energy Drink");
+        JCheckBox headphones = new JCheckBox("Headphones");
+        checkButtons.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        checkButtons.add(wristSupport);
+        checkButtons.add(energyDrink);
+        checkButtons.add(headphones);
+        accessories.add(checkButtons, BorderLayout.NORTH);
+        accessories.add(accessoriesInfo, BorderLayout.CENTER);
 
         JButton submit = new JButton("Add typist");
         JLabel invalidInputError = HelperUtilities.createError("Invalid Input!");
         JLabel existingError = HelperUtilities.createError("There is an already existing typist registered with that name or symbol!");
 
-        input.add(nameLabel);
-        input.add(typistName);
-        input.add(symbolLabel);
-        input.add(typistSymbol);
-        input.add(accuracyLabel);
-        input.add(typistAccuracy);
+        input.add(namePanel);
+        input.add(symbolPanel);
+        input.add(colourPanel);
+        input.add(accuracyPanel);
+        input.add(typingStylePanel);
+        input.add(keyboardPanel);
+        input.add(accessories);
 
         JScrollPane scrollInput = new JScrollPane(input);
         content.add(scrollInput, BorderLayout.CENTER);
@@ -275,15 +349,53 @@ class AddTypistMenu extends Menu
 
                 if(! usedNames.contains(name) && ! usedSymbols.contains(cSymbol))
                 {
-                    TypistSimulation typist = new TypistSimulation(cSymbol, name, dAccuracy);
+                    boolean[] accessoriesChoice = {false, false, false};
+
+                    if(wristSupport.isSelected())
+                    {
+                        accessoriesChoice[0] = true;
+                    }
+
+                    if(energyDrink.isSelected())
+                    {
+                        accessoriesChoice[1] = true;
+                    }
+
+                    if(headphones.isSelected())
+                    {
+                        accessoriesChoice[2] = true;
+                    }
+
+                    String typingProfile = (String) typingStyleOptions.getSelectedItem();
+                    String keyboard = (String) keyboardOptions.getSelectedItem();
+                    Color colour = colourButton.getBackground();
+                    TypistSimulation typist = new TypistSimulation(cSymbol, name, dAccuracy, typingProfile, keyboard, colour, accessoriesChoice);
+
                     usedNames.add(name);
                     usedSymbols.add(cSymbol);
                     typists.add(typist);
                     currentNumberOfTypists++;
 
-                    if(currentNumberOfTypists == information.getNumberOfTypists())
+                    if(currentNumberOfTypists == gameInformation.getNumberOfTypists())
                     {
+                        gameInformation.setTypists(typists);
+                        SimulationMenu simulationMenu = new SimulationMenu(gameInformation);
+                        simulationMenu.setupSimulation();
+                        menus.add(simulationMenu.createMenu(menus, cards, "MENU"), "GAME");
                         cards.show(menus, nextMenu);
+                        
+                        timer = new Timer(200, f -> {
+                            simulationMenu.updateSimulation();
+
+                            if(simulationMenu.getFinished())
+                            {
+                                timer.stop();
+                                simulationMenu.finishedRace(timer);
+                            }
+
+                        });
+
+                        timer.start();
                     }
 
                     if(content.isAncestorOf(invalidInputError))
@@ -342,5 +454,226 @@ class AddTypistMenu extends Menu
         }
 
         return true;
+    }
+}
+
+class SimulationMenu extends Menu
+{
+    private HashMap<JPanel, JTextArea[]> trackMap;
+    private JPanel[] tracks;
+    private JTextArea[] playerinformations;
+    private String passage;
+    private int passageLength;
+    private TypingRaceSimulation simulation;
+    private boolean isFinished = false;
+
+    public SimulationMenu(GameInfo gameInformation)
+    {
+        super(gameInformation);
+        trackMap = new HashMap<>();
+        passage = gameInformation.getPassage();
+        passageLength = passage.length();
+        tracks = new JPanel[gameInformation.getNumberOfTypists()];
+        
+        boolean[] modes = {gameInformation.isAutoCorrect(), gameInformation.isCaffeine(), gameInformation.isNight()};
+        simulation = new TypingRaceSimulation(passageLength - 1, gameInformation.getTypists(), modes);
+    }
+
+    public void setupSimulation()
+    {
+       simulation.resetTypists(); 
+    }
+
+    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu)
+    {   
+        simulation.configureGame();
+        JPanel content = new JPanel(new BorderLayout());
+        JPanel simulation = new JPanel();
+        simulation.setLayout(new BoxLayout(simulation, BoxLayout.Y_AXIS));
+
+        GameInfo gameInformation = getGameInfo();
+        playerinformations = new JTextArea[gameInformation.getNumberOfTypists()];
+        ArrayList<TypistSimulation> typists = gameInformation.getTypists();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+        int gridLength = 30;
+        if(passageLength <  gridLength)
+        {
+            gridLength = passageLength;
+        }
+
+        for(int i = 0; i < gameInformation.getNumberOfTypists(); i++)
+        {
+            JPanel track = new JPanel(new GridLayout(0, gridLength, 5, 5));
+            JTextArea[] gridCells = new JTextArea[passageLength];
+            TypistSimulation typist = typists.get(i);
+            
+            JTextArea cell = new JTextArea(2, 1);
+            cell.setText(typist.getSymbol() + "\n" + passage.charAt(0));
+            cell.setEditable(false);
+            HelperUtilities.addTextAreaPadding(cell, 7);
+            track.add(cell);
+            gridCells[0] = cell;
+
+            for(int j = 1; j < passageLength; j++)
+            {
+                JTextArea cellN = new JTextArea(2, 1);
+                cellN.setText("\n" + passage.charAt(j));
+                cellN.setEditable(false);
+                HelperUtilities.addTextAreaPadding(cellN, 7);
+                track.add(cellN);
+                gridCells[j] = cellN;
+            }
+
+            JPanel trackTestPanel = new JPanel(new BorderLayout());
+            HelperUtilities.addPanelPadding(trackTestPanel, 15);
+            JTextArea player = new JTextArea(3, 1);
+            setPlayerInfo(player, typist);
+            player.append("                                     ");
+            player.setEditable(false);
+            HelperUtilities.addTextAreaPadding(player, 5);
+            trackTestPanel.add(player, BorderLayout.WEST);
+            playerinformations[i] = player;
+            trackMap.put(track, gridCells);
+            tracks[i] = track;
+            HelperUtilities.addPanelPadding(track, 5);
+            trackTestPanel.add(track, BorderLayout.CENTER);
+            simulation.add(trackTestPanel);
+        }
+
+        content.add(simulation, BorderLayout.CENTER);
+        container.add(content, BorderLayout.CENTER);
+        return container;
+    }
+
+    public void updateSimulation()
+    {
+        ArrayList<TypistSimulation> typists = getGameInfo().getTypists();
+
+        for(int i = 0; i < getGameInfo().getNumberOfTypists(); i++)
+        {
+            TypistSimulation typist = typists.get(i);
+            int progressBefore = typist.getProgress();
+            simulation.advanceTypist(typist);
+            int progress = typist.getProgress();
+            JPanel track = tracks[i];
+            JTextArea[] gridCells = trackMap.get(track);
+
+            if(progressBefore != progress)
+            {
+                JTextArea currentCell = gridCells[progress];
+                int currentMaxProgress;
+
+                if(progressBefore > progress)
+                {
+                    currentMaxProgress = progressBefore;
+                }
+                else{
+                    currentMaxProgress = progress;
+                }
+
+                for(int j = 0; j <= currentMaxProgress; j++)
+                {
+                    JTextArea coveredCell = gridCells[j];
+                    coveredCell.setBackground(Color.WHITE);
+                    coveredCell.setText("\n" + passage.charAt(j));
+
+                    if(j <= progress)
+                    {
+                        coveredCell.setForeground(typist.getColour());
+                    }
+                    else{
+                        coveredCell.setForeground(Color.BLACK);
+                    }
+                }
+                
+                currentCell.setText(typist.getSymbol() + "\n" + passage.charAt(progress));
+                currentCell.setBackground(Color.YELLOW);
+            }
+
+            JTextArea playerInfo = playerinformations[i];
+            setPlayerInfo(playerInfo, typist);
+            
+            if(typist.isBurntOut())
+            {
+                gridCells[progress].setForeground(Color.RED);
+                gridCells[progress].setBackground(Color.WHITE);
+
+                playerInfo.append("BURNT OUT (" + typist.getBurnoutTurnsRemaining() + " turns) ");
+                playerInfo.setForeground(Color.RED);
+
+            }
+
+            else if(typist.isMistyped())
+            {
+                gridCells[progress].setForeground(Color.RED);   
+
+                playerInfo.append("← just mistyped           ");
+                playerInfo.setForeground(Color.RED);
+            }
+
+            else{
+                gridCells[progress].setForeground(Color.BLACK);
+                gridCells[progress].setBackground(Color.YELLOW);
+
+                playerInfo.append("                                     ");
+                playerInfo.setForeground(Color.BLACK);
+                
+            }
+
+            if(simulation.raceFinishedBy(typist))
+            {
+                gridCells[progress].setBackground(Color.WHITE);
+                gridCells[progress].setForeground(Color.GREEN);
+                isFinished = true;
+            }
+        }
+    }
+
+    private void setPlayerInfo(JTextArea playerInfo, TypistSimulation typist)
+    {
+        playerInfo.setText(typist.getName() + " ( " + typist.getSymbol() + " )" + "\n" + "(Accuracy: " + typist.getAccuracy() + ")" + "\n");
+    }
+
+    public boolean getFinished()
+    {
+        return isFinished;
+    }
+
+    public void finishedRace(Timer timer)
+    {
+        JButton restart = new JButton("Race Again");
+        restart.addActionListener(e -> {
+            simulation.resetTypists();
+            clearStates();
+            isFinished = false;
+
+            if(container.isAncestorOf(restart))
+            {
+                container.remove(restart);
+            }
+
+            timer.start();
+        });
+
+        container.add(restart, BorderLayout.SOUTH);
+    }
+
+    private void clearStates()
+    {
+        GameInfo gameInformation = getGameInfo();
+        for(int i = 0; i < gameInformation.getNumberOfTypists(); i++)
+        {
+            JPanel track = tracks[i];
+            JTextArea[] gridCells = trackMap.get(track);
+
+            for(int j = 0; j < gridCells.length; j++)
+            {
+                JTextArea currentCell = gridCells[j];
+                currentCell.setForeground(Color.BLACK);
+                currentCell.setBackground(Color.WHITE);
+                currentCell.setText("\n" + passage.charAt(j));
+            }
+        }
     }
 }

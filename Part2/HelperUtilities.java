@@ -9,7 +9,7 @@ public class HelperUtilities
     {
         try
         {
-            int intResponse = Integer.parseInt(text);
+           Integer.parseInt(text);
         }
         catch(NumberFormatException e)
         {
@@ -23,7 +23,7 @@ public class HelperUtilities
     {
         try
         {
-            double doubleResponse = Double.parseDouble(text);
+            Double.parseDouble(text);
         }
         catch(NumberFormatException e)
         {
@@ -53,8 +53,7 @@ public class HelperUtilities
         centerText(title);
         addLabelPadding(title, 5);
         titleWrapper.add(title);
-        titleWrapper.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
-        titleWrapper.setBackground(Color.white);
+        titleWrapper.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         container.add(titleWrapper, BorderLayout.NORTH);
     }
 
