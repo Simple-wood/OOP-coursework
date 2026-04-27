@@ -57,10 +57,24 @@ public class TypingRaceSimulation
         {
             updateTypistAccuracy(0.05);
         }
+
+        Iterator<TypistSimulation> typistsIterator = typists.iterator();
+        TypistSimulation currentTypist = null;
+
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+
+            if(currentTypist.hasEnergyDrink())
+            {
+                currentTypist.setAccuracy(currentTypist.getAccuracy() * 2);
+            }
+
+            currentTypist.configureTypist();
+        }
     }
 
-
-    private void resetTypists()
+    public void resetTypists()
     { 
         Iterator<TypistSimulation> typistsIterator = typists.iterator();
         TypistSimulation currentTypist = null;
@@ -80,7 +94,7 @@ public class TypingRaceSimulation
         while(typistsIterator.hasNext())
         {
             currentTypist = typistsIterator.next();
-            currentTypist.setTypeIncrement(amount);
+            currentTypist.setTypeIncrement(currentTypist.getTypeIncrement() + 1);
         }
     }
 
@@ -130,36 +144,40 @@ public class TypingRaceSimulation
             // Attempt to type a character
         if (Math.random() < typistAccuracy)
         {
-            theTypist.typeCharacter();
+            theTypist.typeCharacter(passageLength);
 
             if(raceFinishedBy(theTypist)) // If we have finished the race now, there is no need to check for burnouts or mistypes!
             {
                 return;
             }
 
-            // Mistype check — the probability should reflect the typist's accuracy
-            
-            if (Math.random() < (1 - typistAccuracy) * mistype_base_chance)
+            // Burnout check — pushing too hard increases burnout risk
+            // (probability scales with accuracy squared, capped at ~0.05)
+            if (Math.random() < (theTypist.getBurnoutChanceCap() + (theTypist.getBurnoutChanceCap() * Math.pow(typistAccuracy, 3))))
+            {
+                theTypist.burnOut(theTypist.getBurnoutDuration());
+                theTypist.incrementNumberOfBurnouts();
+            }
+        }
+        else if (Math.random() < (1 - typistAccuracy) * theTypist.getMistypeBaseChance())
             {
                 theTypist.slideBack(slide_back_amount);
             }
 
-            // Burnout check — pushing too hard increases burnout risk
-            // (probability scales with accuracy squared, capped at ~0.05)
-            if (Math.random() < (0.05 + (0.05 * Math.pow(typistAccuracy, 2)) * Math.pow(typistAccuracy, 2)))
-            {
-                theTypist.burnOut(burnout_duration);
-                theTypist.incrementNumberOfBurnouts();
-            }
-        }
-
         if(globalModes[1])
         {
-            if((int) turns / typists.size() == 10)
+            if((int) (turns / typists.size()) == 10)
             {
                 updateTypistIncrements(1);
                 burnout_duration = 5; // Increased burnout risk now -> burn out duration lasts longer!
             }
+        }
+
+        if(theTypist.hasEnergyDrink())
+        {
+            if((int) (turns / typists.size()) == 15){
+                theTypist.setAccuracy(theTypist.getAccuracy() * 0.25);
+            }  
         }
     }
 
