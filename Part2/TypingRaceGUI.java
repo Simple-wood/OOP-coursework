@@ -11,12 +11,10 @@ public class TypingRaceGUI
     {
         GameInfo information = new GameInfo();
         PassageMenu passageMenu = new PassageMenu(information);
-        TypistCountMenu countMenu = new TypistCountMenu(information);
         AddTypistMenu addTypistMenu = new AddTypistMenu(information);
 
-        menus.add(passageMenu.createMenu(menus, cards, "NUMBER"), "MENU");
-        menus.add(countMenu.createMenu(menus, cards, "ADD"), "NUMBER");
-        menus.add(addTypistMenu.createMenu(menus, cards, "MENU"), "ADD");
+        menus.add(passageMenu.createMenu(menus, cards, "ADD"), "MENU");
+        menus.add(addTypistMenu.createMenu(menus, cards, "GAME"), "ADD");;
         window.add(menus);
 
         cards.show(menus, "MENU");
