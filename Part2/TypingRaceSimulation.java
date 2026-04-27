@@ -16,7 +16,6 @@ import java.lang.Math;
 public class TypingRaceSimulation
 {
     private int passageLength;   // Total characters in the passage to type
-    private int turns = 0;
     private ArrayList<TypistSimulation> typists;
     private TypistSimulation winner = null;
 
@@ -124,7 +123,7 @@ public class TypingRaceSimulation
      */
     public void advanceTypist(TypistSimulation theTypist)
     { 
-        turns++;
+        theTypist.incrementNumberOfTurns();
         double typistAccuracy = theTypist.getAccuracy();
 
         if (theTypist.isBurntOut())
@@ -164,7 +163,7 @@ public class TypingRaceSimulation
 
         if(globalModes[1])
         {
-            if((int) (turns / typists.size()) == 10)
+            if(theTypist.getTurns() == 10)
             {
                 updateTypistIncrements(1);
                 theTypist.setBurnoutDuration(theTypist.getBurnoutDuration() + 2); // Increased burnout risk now -> burn out duration lasts longer!
@@ -173,7 +172,7 @@ public class TypingRaceSimulation
 
         if(theTypist.hasEnergyDrink())
         {
-            if((int) (turns / typists.size()) == 15){
+            if(theTypist.getTurns()== 15){
                 theTypist.setAccuracy(theTypist.getAccuracy() * 0.25);
             }  
         }
