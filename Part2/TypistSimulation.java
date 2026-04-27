@@ -28,8 +28,8 @@ public class TypistSimulation
     private boolean burntOut;
     private boolean mistyped; // boolean flag to represent if a typist has mistyped or not
     private int burntOutTurnsRemaining;
-
     private int numberOfBurnouts;
+    private int turns = 0;
 
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
@@ -365,5 +365,15 @@ public class TypistSimulation
     public Color getColour()
     {
         return colour;
+    }
+
+    public int getTurns()
+    {
+        return turns;
+    }
+
+    public void incrementNumberOfTurns()
+    {
+        turns++;
     }
 }
