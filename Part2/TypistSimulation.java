@@ -31,6 +31,9 @@ public class TypistSimulation
     private int numberOfBurnouts;
     private int turns = 0;
 
+    private int totalTypedCharacters = 0;
+    private int totalCorrectTypedCharacters = 0;
+
     private final double upperAccuracyLimit = 1.0;
     private final double lowerAccuracyLimit = 0.0;
     private final int MINIMUM_PROGRESS = 0; // Progress cannot go below 0
@@ -376,4 +379,24 @@ public class TypistSimulation
     {
         turns++;
     }
+
+    public void incrementCharactersTyped()
+    {
+        totalTypedCharacters++;
+    }
+
+    public void incrementCorrectCharactersTyped()
+    {
+        totalCorrectTypedCharacters++;
+    }
+
+    public double calculateActualAccuracy()
+    {
+        double accuracy = (double)totalTypedCharacters / (double)totalCorrectTypedCharacters;
+        double roundedAccuracy = ((int) accuracy * 1000) / 1000.0;
+
+        return roundedAccuracy;
+    }
+
+
 }
