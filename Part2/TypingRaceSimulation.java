@@ -17,7 +17,7 @@ public class TypingRaceSimulation
 {
     private int passageLength;   // Total characters in the passage to type
     private ArrayList<TypistSimulation> typists;
-    private TypistSimulation winner = null;
+    private ArrayList<TypistSimulation> winners;
 
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
@@ -35,6 +35,7 @@ public class TypingRaceSimulation
     {
         this.passageLength = passageLength;
         this.typists = typists;
+        this.winners = new ArrayList<>();
         this.globalModes = modes;
     }
 
@@ -123,7 +124,7 @@ public class TypingRaceSimulation
      */
     public void advanceTypist(TypistSimulation theTypist)
     { 
-        theTypist.incrementNumberOfTurns();
+        theTypist.incrementNumberOfTurns(1);
         double typistAccuracy = theTypist.getAccuracy();
 
         if (theTypist.isBurntOut())
@@ -145,6 +146,12 @@ public class TypingRaceSimulation
 
             if(raceFinishedBy(theTypist)) // If we have finished the race now, there is no need to check for burnouts or mistypes!
             {
+                theTypist.incrementNumberOfTurns(-1);
+                if(! winners.contains(theTypist))
+                {
+                    winners.add(theTypist);
+                }
+
                 return;
             }
 
@@ -194,7 +201,7 @@ public class TypingRaceSimulation
             double outcome = LOSS_OUTCOME;
             int numberOfBurnouts = currentTypist.getNumberOfBurnouts();
             
-            if(currentTypist == winner)
+            if(currentTypist == winners.get(0))
             {
                 outcome = WIN_OUTCOME;
             }
@@ -230,5 +237,26 @@ public class TypingRaceSimulation
         {
             return false;
         }
+    }
+
+    public boolean raceConcluded()
+    {
+        if(winners.size() == typists.size())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public ArrayList<TypistSimulation> getWinners()
+    {
+        return winners;
+    }
+
+    public void restartRace()
+    {
+        resetTypists();
+        winners.clear();
     }
 }
