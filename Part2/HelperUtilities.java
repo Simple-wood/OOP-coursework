@@ -1,7 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-
 import java.awt.*;
+import java.util.regex.*;
 
 public class HelperUtilities
 {
@@ -43,6 +43,20 @@ public class HelperUtilities
         }
 
         return false;
+    }
+
+    public static int countWords(String passage)
+    {
+        int count = 0;
+        Pattern pattern = Pattern.compile("[a-zA-Z0-9]+");
+        Matcher matcher = pattern.matcher(passage);
+
+        while(matcher.find())
+        {
+            count ++;
+        }
+
+        return count;
     }
 
     public static void addTitle(JPanel container)
