@@ -1,7 +1,9 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.HashMap;
 
 public class Menu
@@ -155,6 +157,7 @@ class PassageMenu extends Menu
                 }
                 else{
                    gameInformation.setPassage(buffer);
+                   gameInformation.setNumberOfWords(HelperUtilities.countWords(buffer));
                    gameInformation.setNumberOfTypists((int) typistCount.getValue());
 
                    if(autoCorrect.isSelected())
@@ -185,6 +188,7 @@ class PassageMenu extends Menu
                 }
                 else{
                     gameInformation.setPassage(buffer);
+                    gameInformation.setNumberOfWords(HelperUtilities.countWords(buffer));
                     gameInformation.setNumberOfTypists((int) typistCount.getValue());
 
                    if(autoCorrect.isSelected())
@@ -380,17 +384,23 @@ class AddTypistMenu extends Menu
                     {
                         gameInformation.setTypists(typists);
                         SimulationMenu simulationMenu = new SimulationMenu(gameInformation);
+                        ArrayList<PerformanceMetric> results = new ArrayList<>();
                         simulationMenu.setupSimulation();
                         menus.add(simulationMenu.createMenu(menus, cards, "MENU"), "GAME");
                         cards.show(menus, nextMenu);
                         
                         timer = new Timer(200, f -> {
-                            simulationMenu.updateSimulation();
+                            
+                            simulationMenu.updateSimulation(results);
 
                             if(simulationMenu.getFinished())
                             {
                                 timer.stop();
-                                simulationMenu.finishedRace(timer);
+                                simulationMenu.finishedRace();
+                                ResultsMenu resultsMenu = new ResultsMenu(gameInformation, results);
+                                menus.add(resultsMenu.createMenu(menus, cards, "GAME", timer), "RESULTS");
+                                cards.show(menus, "RESULTS");
+                                results.clear();
                             }
 
                         });
@@ -464,6 +474,7 @@ class SimulationMenu extends Menu
     private JTextArea[] playerinformations;
     private String passage;
     private int passageLength;
+    private int passageWordCount;
     private TypingRaceSimulation simulation;
     private boolean isFinished = false;
 
@@ -472,6 +483,7 @@ class SimulationMenu extends Menu
         super(gameInformation);
         trackMap = new HashMap<>();
         passage = gameInformation.getPassage();
+        passageWordCount = gameInformation.getNumberOfWords();
         passageLength = passage.length();
         tracks = new JPanel[gameInformation.getNumberOfTypists()];
         
@@ -488,8 +500,8 @@ class SimulationMenu extends Menu
     {   
         simulation.configureGame();
         JPanel content = new JPanel(new BorderLayout());
-        JPanel simulation = new JPanel();
-        simulation.setLayout(new BoxLayout(simulation, BoxLayout.Y_AXIS));
+        JPanel simulationP = new JPanel(new BorderLayout());
+        simulationP.setLayout(new BoxLayout(simulationP, BoxLayout.Y_AXIS));
 
         GameInfo gameInformation = getGameInfo();
         playerinformations = new JTextArea[gameInformation.getNumberOfTypists()];
@@ -538,15 +550,15 @@ class SimulationMenu extends Menu
             tracks[i] = track;
             HelperUtilities.addPanelPadding(track, 5);
             trackTestPanel.add(track, BorderLayout.CENTER);
-            simulation.add(trackTestPanel);
+            simulationP.add(trackTestPanel);
         }
 
-        content.add(simulation, BorderLayout.CENTER);
+        content.add(simulationP, BorderLayout.CENTER);
         container.add(content, BorderLayout.CENTER);
         return container;
     }
 
-    public void updateSimulation()
+    public void updateSimulation(ArrayList<PerformanceMetric> results)
     {
         ArrayList<TypistSimulation> typists = getGameInfo().getTypists();
 
@@ -624,10 +636,19 @@ class SimulationMenu extends Menu
             if(simulation.raceFinishedBy(typist))
             {
                 gridCells[progress].setBackground(Color.WHITE);
-                gridCells[progress].setForeground(Color.GREEN);
+                gridCells[progress].setForeground(typist.getColour());
+            }
+
+            if(simulation.raceConcluded())
+            {
                 isFinished = true;
             }
         }
+
+    if(isFinished)
+    {
+        simulation.updateAndGetResults(results, passageWordCount, 0.2);
+    }
     }
 
     private void setPlayerInfo(JTextArea playerInfo, TypistSimulation typist)
@@ -640,23 +661,11 @@ class SimulationMenu extends Menu
         return isFinished;
     }
 
-    public void finishedRace(Timer timer)
+    public void finishedRace()
     {
-        JButton restart = new JButton("Race Again");
-        restart.addActionListener(e -> {
-            simulation.resetTypists();
-            clearStates();
-            isFinished = false;
-
-            if(container.isAncestorOf(restart))
-            {
-                container.remove(restart);
-            }
-
-            timer.start();
-        });
-
-        container.add(restart, BorderLayout.SOUTH);
+        simulation.restartRace();
+        clearStates();
+        isFinished = false;
     }
 
     private void clearStates()
@@ -675,5 +684,86 @@ class SimulationMenu extends Menu
                 currentCell.setText("\n" + passage.charAt(j));
             }
         }
+    }
+}
+
+class ResultsMenu extends Menu
+{
+    private ArrayList<PerformanceMetric> results;
+
+    public ResultsMenu(GameInfo gameInformation, ArrayList<PerformanceMetric> results)
+    {
+        super(gameInformation);
+        this.results = results;
+    }
+
+    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu, Timer timer)
+    {
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+        Iterator<PerformanceMetric> resultsIterator = results.iterator();
+        PerformanceMetric currentResult = null;
+
+        while(resultsIterator.hasNext())
+        {
+            currentResult = resultsIterator.next();
+            JPanel track = new JPanel(new BorderLayout(10, 10));
+            JPanel trackContent = new JPanel(new BorderLayout());
+            JPanel stats = new JPanel();
+            stats.setLayout(new BoxLayout(stats, BoxLayout.Y_AXIS));
+            JLabel position = new JLabel(currentResult.getPosition() + ". " + currentResult.getTypist().getName());
+            JPanel positionPanel = new JPanel(new BorderLayout());
+            JLabel positionPadding = new JLabel("                   ");
+            positionPanel.add(position, BorderLayout.CENTER);
+            positionPanel.add(positionPadding, BorderLayout.SOUTH);
+            positionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            HelperUtilities.centerText(position);
+
+            track.add(positionPanel, BorderLayout.WEST);
+
+            JPanel wpmPanel = new JPanel();
+            HelperUtilities.addTitleBorder(wpmPanel, "WPM");
+            JLabel wpm = new JLabel("" + currentResult.getWPM());
+            wpmPanel.add(wpm);
+            stats.add(wpmPanel);
+
+            JPanel tAcuuracyPanel = new JPanel();
+            HelperUtilities.addTitleBorder(tAcuuracyPanel, "True Accuracy");
+            JLabel tAccuracy = new JLabel("" + currentResult.getTrueAccuracy());
+            tAcuuracyPanel.add(tAccuracy);
+            stats.add(tAcuuracyPanel);
+
+            JPanel aChangePanel = new JPanel();
+            HelperUtilities.addTitleBorder(aChangePanel, "Accuracy Change");
+            JLabel aChange = new JLabel("" + currentResult.getAccuracyChange());
+            aChangePanel.add(aChange);
+            stats.add(aChangePanel);
+
+            JPanel burnoutCountPanel = new JPanel();
+            HelperUtilities.addTitleBorder(burnoutCountPanel, "Number Of Burnouts");
+            JLabel burnoutCount = new JLabel("" + currentResult.getBurnoutCount());
+            burnoutCountPanel.add(burnoutCount);
+            stats.add(burnoutCountPanel);
+
+            trackContent.add(stats, BorderLayout.CENTER);
+            track.add(trackContent, BorderLayout.CENTER);
+            HelperUtilities.addPanelPadding(track, 10);
+            content.add(track);
+        }
+
+        JPanel buttonGroup = new JPanel();
+        JButton restart = new JButton("Race again");
+        buttonGroup.add(restart);
+
+        restart.addActionListener(e ->{
+            cards.show(menus, nextMenu);
+            timer.start();
+        });
+
+        JScrollPane scrollContent = new JScrollPane(content);
+        container.add(scrollContent, BorderLayout.CENTER);
+        container.add(buttonGroup, BorderLayout.SOUTH);
+        return container;
     }
 }
