@@ -263,9 +263,9 @@ public class TypingRaceSimulation
         double oldAccuracy = currentTypist.getAccuracy();
         int numberOfBurnouts = currentTypist.getNumberOfBurnouts();
         double newAccuracy = calculateNewAccuracy(0.025, 1.0, oldAccuracy, numberOfBurnouts);
-        double wpm = HelperUtilities.round(2, (numberOfWords / (timePerTurn * currentTypist.getTurns())) * 60.0);
+        double wpm = HelperUtilities.truncate(2, (numberOfWords / (timePerTurn * currentTypist.getTurns())) * 60.0);
         double trueAccuracy = currentTypist.calculateActualAccuracy();
-        double accuracyChange = HelperUtilities.round(3, newAccuracy - oldAccuracy);
+        double accuracyChange = HelperUtilities.truncate(3, newAccuracy - oldAccuracy);
         PerformanceMetric result = new PerformanceMetric(wpm, trueAccuracy, numberOfBurnouts, position, accuracyChange, currentTypist);
         results.add(result);
 
@@ -277,9 +277,9 @@ public class TypingRaceSimulation
             oldAccuracy = currentTypist.getAccuracy();
             numberOfBurnouts = currentTypist.getNumberOfBurnouts();
             newAccuracy = calculateNewAccuracy(0.025, 1.0, oldAccuracy, numberOfBurnouts);
-            wpm = HelperUtilities.round(2, (numberOfWords / (timePerTurn * currentTypist.getTurns())) * 60.0);
+            wpm = HelperUtilities.truncate(2, (numberOfWords / (timePerTurn * currentTypist.getTurns())) * 60.0);
             trueAccuracy = currentTypist.calculateActualAccuracy();
-            accuracyChange = HelperUtilities.round(3, newAccuracy - oldAccuracy);
+            accuracyChange = HelperUtilities.truncate(3, newAccuracy - oldAccuracy);
             result = new PerformanceMetric(wpm, trueAccuracy, numberOfBurnouts, position, accuracyChange, currentTypist);
             results.add(result);
         }

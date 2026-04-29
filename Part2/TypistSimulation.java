@@ -175,6 +175,9 @@ public class TypistSimulation
         burntOutTurnsRemaining = 0; // To entirely clear burnout, bruntOutTurnsRemaining must be set to 0
         mistyped = false;
         numberOfBurnouts = 0;
+        totalTypedCharacters = 0;
+        totalCorrectTypedCharacters = 0;
+        turns = 0;
     }
 
     /**
@@ -375,9 +378,9 @@ public class TypistSimulation
         return turns;
     }
 
-    public void incrementNumberOfTurns()
+    public void incrementNumberOfTurns(int amount)
     {
-        turns++;
+        turns += amount;
     }
 
     public void incrementCharactersTyped()
@@ -388,12 +391,13 @@ public class TypistSimulation
     public void incrementCorrectCharactersTyped()
     {
         totalCorrectTypedCharacters++;
+        incrementCharactersTyped();
     }
 
     public double calculateActualAccuracy()
     {
-        double accuracy = (double)totalTypedCharacters / (double)totalCorrectTypedCharacters;
-        double roundedAccuracy = ((int) accuracy * 1000) / 1000.0;
+        double accuracy = (double)totalCorrectTypedCharacters / (double)totalTypedCharacters;
+        double roundedAccuracy = HelperUtilities.truncate(3, accuracy);
 
         return roundedAccuracy;
     }
