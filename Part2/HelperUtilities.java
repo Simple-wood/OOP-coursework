@@ -59,6 +59,13 @@ public class HelperUtilities
         return count;
     }
 
+    public static double round(int degrees, double amount)
+    {
+        double rounded = (double)((int)(amount * (Math.pow(10.0, degrees)))) / (Math.pow(10.0, degrees));
+
+        return rounded;
+    }
+
     public static void addTitle(JPanel container)
     {
         JPanel titleWrapper = new JPanel();
