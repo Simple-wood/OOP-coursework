@@ -22,7 +22,7 @@ public class TypingRaceSimulation
     // Accuracy thresholds for mistype and burnout events
     // (Ty tuned these values "by feel". They may need adjustment.)
     private int slide_back_amount = 2; 
-    private boolean[] globalModes; // [autocorrect, caffeine night]
+    private boolean[] globalModes; // [autocorrect, caffeine, night]
 
     /**
      * Constructor for objects of class TypingRace.
@@ -124,6 +124,11 @@ public class TypingRaceSimulation
      */
     public void advanceTypist(TypistSimulation theTypist)
     { 
+        if(winners.contains(theTypist))
+        {
+            return;
+        }
+
         theTypist.incrementNumberOfTurns(1);
         double typistAccuracy = theTypist.getAccuracy();
 
@@ -139,14 +144,12 @@ public class TypingRaceSimulation
             theTypist.leaveMistyped();
         }
 
-            // Attempt to type a character
+        // Attempt to type a character
         if (Math.random() < typistAccuracy)
         {
             theTypist.typeCharacter(passageLength);
-
             if(raceFinishedBy(theTypist)) // If we have finished the race now, there is no need to check for burnouts or mistypes!
             {
-                theTypist.incrementNumberOfTurns(-1);
                 if(! winners.contains(theTypist))
                 {
                     winners.add(theTypist);
@@ -154,6 +157,8 @@ public class TypingRaceSimulation
 
                 return;
             }
+
+            theTypist.incrementCorrectCharactersTyped();
 
             // Burnout check — pushing too hard increases burnout risk
             // (probability scales with accuracy squared, capped at ~0.05)
@@ -165,6 +170,7 @@ public class TypingRaceSimulation
         }
         else if (Math.random() < (1 - typistAccuracy) * theTypist.getMistypeBaseChance())
             {
+                theTypist.incrementCharactersTyped();
                 theTypist.slideBack(slide_back_amount);
             }
 
@@ -249,13 +255,39 @@ public class TypingRaceSimulation
         return false;
     }
 
-    public ArrayList<TypistSimulation> getWinners()
+    public void updateAndGetResults(ArrayList<PerformanceMetric> results, int numberOfWords, double timePerTurn)
     {
-        return winners;
+        int position = 1;
+        Iterator<TypistSimulation> winnersIterator = winners.iterator();
+        TypistSimulation currentTypist = winnersIterator.next();
+        double oldAccuracy = currentTypist.getAccuracy();
+        int numberOfBurnouts = currentTypist.getNumberOfBurnouts();
+        double newAccuracy = calculateNewAccuracy(0.025, 1.0, oldAccuracy, numberOfBurnouts);
+        double wpm = HelperUtilities.round(2, (numberOfWords / (timePerTurn * currentTypist.getTurns())) * 60.0);
+        double trueAccuracy = currentTypist.calculateActualAccuracy();
+        double accuracyChange = HelperUtilities.round(3, newAccuracy - oldAccuracy);
+        PerformanceMetric result = new PerformanceMetric(wpm, trueAccuracy, numberOfBurnouts, position, accuracyChange, currentTypist);
+        results.add(result);
+
+
+        while(winnersIterator.hasNext())
+        {
+            position++;
+            currentTypist = winnersIterator.next();
+            oldAccuracy = currentTypist.getAccuracy();
+            numberOfBurnouts = currentTypist.getNumberOfBurnouts();
+            newAccuracy = calculateNewAccuracy(0.025, 1.0, oldAccuracy, numberOfBurnouts);
+            wpm = HelperUtilities.round(2, (numberOfWords / (timePerTurn * currentTypist.getTurns())) * 60.0);
+            trueAccuracy = currentTypist.calculateActualAccuracy();
+            accuracyChange = HelperUtilities.round(3, newAccuracy - oldAccuracy);
+            result = new PerformanceMetric(wpm, trueAccuracy, numberOfBurnouts, position, accuracyChange, currentTypist);
+            results.add(result);
+        }
     }
 
     public void restartRace()
     {
+        updateTypistRatings();
         resetTypists();
         winners.clear();
     }
