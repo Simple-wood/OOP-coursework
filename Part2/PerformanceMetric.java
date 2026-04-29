@@ -4,15 +4,17 @@ public class PerformanceMetric
     private double trueAccuracy;
     private int burnoutCount;
     private int position;
+    private TypistSimulation typist;
     private double accuracyChange;
 
-    public PerformanceMetric(double wpm, double trueAccuracy, int burnoutCount, int position, double accuracyChange)
+    public PerformanceMetric(double wpm, double trueAccuracy, int burnoutCount, int position, double accuracyChange, TypistSimulation typist)
     {
         this.wpm = wpm;
         this.trueAccuracy = trueAccuracy;
         this.burnoutCount = burnoutCount;
         this.position = position;
         this.accuracyChange = accuracyChange;
+        this.typist = typist;
     }
 
     public double getWPM()
@@ -38,6 +40,11 @@ public class PerformanceMetric
     public int getBurnoutCount()
     {
         return burnoutCount;
+    }
+
+    public TypistSimulation getTypist()
+    {
+        return typist;
     }
 
 }
