@@ -3,6 +3,7 @@ import java.util.ArrayList;
 public class GameInfo
 {
     private String passage;
+    private int numberOfWords;
     private int numberOfTypists;
     private ArrayList<TypistSimulation> typists;
     private boolean autoCorrectMode = false;
@@ -67,5 +68,15 @@ public class GameInfo
     public void activateNight()
     {
         nightMode = true;
+    }
+
+    public int getNumberOfWords()
+    {
+        return numberOfWords;
+    }
+
+    public void setNumberOfWords(int amount)
+    {
+        numberOfWords = amount;
     }
 }
