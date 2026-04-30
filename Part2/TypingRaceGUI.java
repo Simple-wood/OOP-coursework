@@ -3,9 +3,24 @@ import java.awt.*;
 
 public class TypingRaceGUI
 {
-    private JFrame window = new JFrame("Typing Race Simulator!");
-    private CardLayout cards = new CardLayout();
-    private JPanel menus = new JPanel(cards);
+    private JFrame window;
+    private CardLayout cards;
+    private JPanel menus;
+
+    public TypingRaceGUI()
+    {
+        window = new JFrame("Typing Race Simulator!"); 
+        cards = new CardLayout();
+        menus = new JPanel(cards);
+    }
+
+    public void startRaceGUI()
+    {
+        configureMenus();
+        window.setSize(300, 300);
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setVisible(true);
+    }
 
     public void configureMenus()
     {
@@ -18,16 +33,11 @@ public class TypingRaceGUI
         window.add(menus);
 
         cards.show(menus, "MENU");
-
-        
-        window.setSize(300, 300);
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setVisible(true);
     }
 
     public static void main(String[] args)
     {
-        TypingRaceGUI test = new TypingRaceGUI();
-        test.configureMenus();
+        TypingRaceGUI game = new TypingRaceGUI();
+        game.startRaceGUI();
     }
 }

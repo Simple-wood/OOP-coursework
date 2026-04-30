@@ -69,6 +69,7 @@ public class TypistSimulation
         setAccuracy(typistAccuracy);
         resetToStart();
     }
+    
 
     // Methods of class Typist
 
