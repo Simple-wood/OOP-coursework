@@ -6,6 +6,7 @@ public class PerformanceMetric
     private int position;
     private TypistSimulation typist;
     private double accuracyChange;
+    private double accuracy;
 
     public PerformanceMetric(double wpm, double trueAccuracy, int burnoutCount, int position, double accuracyChange, TypistSimulation typist)
     {
@@ -15,6 +16,7 @@ public class PerformanceMetric
         this.position = position;
         this.accuracyChange = accuracyChange;
         this.typist = typist;
+        this.accuracy = typist.getAccuracy();
     }
 
     public double getWPM()
@@ -40,6 +42,11 @@ public class PerformanceMetric
     public int getBurnoutCount()
     {
         return burnoutCount;
+    }
+
+    public double getAccuracy()
+    {
+        return accuracy;
     }
 
     public TypistSimulation getTypist()

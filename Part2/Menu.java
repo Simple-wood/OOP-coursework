@@ -1,6 +1,5 @@
 import javax.swing.*;
-import javax.swing.border.Border;
-
+import java.util.Collections;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -385,22 +384,23 @@ class AddTypistMenu extends Menu
                         gameInformation.setTypists(typists);
                         SimulationMenu simulationMenu = new SimulationMenu(gameInformation);
                         ArrayList<PerformanceMetric> results = new ArrayList<>();
+                        HashMap<TypistSimulation, RacingHistory> racingHistories = new HashMap<>();
+
                         simulationMenu.setupSimulation();
                         menus.add(simulationMenu.createMenu(menus, cards, "MENU"), "GAME");
                         cards.show(menus, nextMenu);
                         
                         timer = new Timer(200, f -> {
                             
-                            simulationMenu.updateSimulation(results);
+                            simulationMenu.updateSimulation(results, racingHistories);
 
                             if(simulationMenu.getFinished())
                             {
                                 timer.stop();
                                 simulationMenu.finishedRace();
                                 ResultsMenu resultsMenu = new ResultsMenu(gameInformation, results);
-                                menus.add(resultsMenu.createMenu(menus, cards, "GAME", timer), "RESULTS");
+                                menus.add(resultsMenu.createMenu(menus, cards, "GAME", timer, racingHistories), "RESULTS");
                                 cards.show(menus, "RESULTS");
-                                results.clear();
                             }
 
                         });
@@ -537,28 +537,30 @@ class SimulationMenu extends Menu
                 gridCells[j] = cellN;
             }
 
-            JPanel trackTestPanel = new JPanel(new BorderLayout());
-            HelperUtilities.addPanelPadding(trackTestPanel, 15);
+            JPanel trackWrapper = new JPanel(new BorderLayout());
+            HelperUtilities.addPanelPadding(trackWrapper, 15);
             JTextArea player = new JTextArea(3, 1);
             setPlayerInfo(player, typist);
             player.append("                                     ");
             player.setEditable(false);
             HelperUtilities.addTextAreaPadding(player, 5);
-            trackTestPanel.add(player, BorderLayout.WEST);
+            trackWrapper.add(player, BorderLayout.WEST);
             playerinformations[i] = player;
             trackMap.put(track, gridCells);
             tracks[i] = track;
             HelperUtilities.addPanelPadding(track, 5);
-            trackTestPanel.add(track, BorderLayout.CENTER);
-            simulationP.add(trackTestPanel);
+            trackWrapper.add(track, BorderLayout.CENTER);
+            simulationP.add(trackWrapper);
         }
 
-        content.add(simulationP, BorderLayout.CENTER);
+        JScrollPane scrollSimulation = new JScrollPane(simulationP);
+        content.add(scrollSimulation, BorderLayout.CENTER);
         container.add(content, BorderLayout.CENTER);
+        HelperUtilities.addTitle(container);
         return container;
     }
 
-    public void updateSimulation(ArrayList<PerformanceMetric> results)
+    public void updateSimulation(ArrayList<PerformanceMetric> results, HashMap<TypistSimulation, RacingHistory> racingHistories)
     {
         ArrayList<TypistSimulation> typists = getGameInfo().getTypists();
 
@@ -645,10 +647,30 @@ class SimulationMenu extends Menu
             }
         }
 
-    if(isFinished)
-    {
-        simulation.updateAndGetResults(results, passageWordCount, 0.2);
-    }
+        if(isFinished)
+        {
+            simulation.updateAndGetResults(results, passageWordCount, 0.2);
+
+            Iterator<PerformanceMetric> resultsIterator = results.iterator();
+            PerformanceMetric currentMetrics = null;
+
+            while(resultsIterator.hasNext())
+            {
+                currentMetrics = resultsIterator.next();
+                TypistSimulation typist = currentMetrics.getTypist();
+
+                if(racingHistories.containsKey(typist))
+                {
+                    RacingHistory history = racingHistories.get(typist);
+                    history.addMetric(currentMetrics);
+                }
+                else{
+                    RacingHistory history = new RacingHistory(currentMetrics);
+                    racingHistories.put(typist, history);
+                }
+            }
+
+        }
     }
 
     private void setPlayerInfo(JTextArea playerInfo, TypistSimulation typist)
@@ -690,6 +712,7 @@ class SimulationMenu extends Menu
 class ResultsMenu extends Menu
 {
     private ArrayList<PerformanceMetric> results;
+    private HashMap<JButton, TypistSimulation> buttonTypistMap = new HashMap<>();
 
     public ResultsMenu(GameInfo gameInformation, ArrayList<PerformanceMetric> results)
     {
@@ -697,7 +720,7 @@ class ResultsMenu extends Menu
         this.results = results;
     }
 
-    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu, Timer timer)
+    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu, Timer timer, HashMap<TypistSimulation, RacingHistory> racingHistories)
     {
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -746,24 +769,398 @@ class ResultsMenu extends Menu
             burnoutCountPanel.add(burnoutCount);
             stats.add(burnoutCountPanel);
 
+            JButton raceHistory = new JButton("Race History");
+            buttonTypistMap.put(raceHistory, currentResult.getTypist());
+
+            raceHistory.addActionListener(e -> {
+                TypistSimulation selectedTypist = buttonTypistMap.get(raceHistory);
+                RacingHistory history = racingHistories.get(selectedTypist);
+
+                HistoryMenu historyMenu = new HistoryMenu(history, selectedTypist, getGameInfo());
+                menus.add(historyMenu.createMenu(menus, cards, "RESULTS"), "HISTORY");
+
+                cards.show(menus, "HISTORY");
+            });
+
+
             trackContent.add(stats, BorderLayout.CENTER);
             track.add(trackContent, BorderLayout.CENTER);
+            track.add(raceHistory, BorderLayout.EAST);
             HelperUtilities.addPanelPadding(track, 10);
             content.add(track);
         }
 
-        JPanel buttonGroup = new JPanel();
+        JPanel buttonGroup = new JPanel(new FlowLayout());
         JButton restart = new JButton("Race again");
+        JButton compare = new JButton("Compare Typists");
+        JButton quit = new JButton("Quit");
         buttonGroup.add(restart);
+        buttonGroup.add(compare);
+        buttonGroup.add(quit);
+
+        quit.addActionListener(e ->{
+            System.exit(0);
+        });
 
         restart.addActionListener(e ->{
             cards.show(menus, nextMenu);
             timer.start();
         });
 
+        compare.addActionListener(e ->{
+            ConfigureCompareMenu comparisionConfigure = new ConfigureCompareMenu(getGameInfo());
+            menus.add(comparisionConfigure.createMenu(menus, cards, nextMenu, results), "COMPARE_CONFIGURE");
+
+            cards.show(menus, "COMPARE_CONFIGURE");
+        });
+
         JScrollPane scrollContent = new JScrollPane(content);
         container.add(scrollContent, BorderLayout.CENTER);
         container.add(buttonGroup, BorderLayout.SOUTH);
+        HelperUtilities.addTitle(container);
         return container;
+    }
+}
+
+class HistoryMenu extends Menu
+{
+    RacingHistory typistHistory;
+    TypistSimulation typist;
+
+    public HistoryMenu(RacingHistory typistHistory, TypistSimulation typist, GameInfo gameInformation)
+    {
+        super(gameInformation);
+        this.typistHistory = typistHistory;
+        this.typist = typist;
+    }
+
+    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu)
+    {
+        JPanel content = new JPanel(new BorderLayout());
+        JPanel historyContent = new JPanel();
+        historyContent.setLayout(new BoxLayout(historyContent, BoxLayout.Y_AXIS));
+        HelperUtilities.addTitleBorder(historyContent, "Racing History");
+        ArrayList<PerformanceMetric> races = new ArrayList<>(typistHistory.getRaceHistory());
+        Collections.reverse(races);
+        Iterator<PerformanceMetric> racesIterator = races.iterator();
+        PerformanceMetric currentRace = null;
+
+        JPanel typistInfo = new JPanel();
+        typistInfo.setLayout(new BoxLayout(typistInfo, BoxLayout.Y_AXIS));
+        HelperUtilities.addTitleBorder(typistInfo, "Typist");
+        JLabel name = new JLabel(typist.getName() + " (" + typist.getSymbol() + ")     ");
+        JLabel wpmPR = new JLabel("WPM PR - " + typistHistory.getBestWPM());
+        JLabel accuracy = new JLabel("Accuracy - " + typist.getAccuracy());
+        
+        double overallAccuracyChange = HelperUtilities.truncate(3, typist.getAccuracy() - typistHistory.getRaceHistory().get(0).getAccuracy());
+        JLabel change;
+        if(overallAccuracyChange < 0.0)
+        {
+            change = new JLabel("-" + overallAccuracyChange);
+            change.setForeground(Color.RED);
+        }
+        else{
+            change = new JLabel("+" + overallAccuracyChange);
+            change.setForeground(Color.GREEN);            
+        }
+
+        typistInfo.add(name);
+        typistInfo.add(wpmPR);
+        typistInfo.add(accuracy);
+        typistInfo.add(change);
+
+        content.add(typistInfo, BorderLayout.WEST);
+
+        while(racesIterator.hasNext())
+        {
+            JPanel race = new JPanel(new FlowLayout());
+            currentRace = racesIterator.next();
+
+            JPanel racePosPanel = new JPanel();
+            HelperUtilities.addTitleBorder(racePosPanel, "Position");
+            JLabel racePos = new JLabel("" + currentRace.getPosition() + "                          ");
+            racePosPanel.add(racePos);
+
+            JPanel accuracyPanel = new JPanel();
+            HelperUtilities.addTitleBorder(accuracyPanel, "Accuracy");
+            accuracy = new JLabel("" + currentRace.getAccuracy() + "                          ");
+            accuracyPanel.add(accuracy);
+
+            JPanel trueAccuracyPanel = new JPanel();
+            HelperUtilities.addTitleBorder(trueAccuracyPanel, "True Accuracy");
+            JLabel trueAccuracy = new JLabel("" + currentRace.getTrueAccuracy() + "                          ");
+            trueAccuracyPanel.add(trueAccuracy);
+
+            JPanel wpmPanel = new JPanel();
+            HelperUtilities.addTitleBorder(wpmPanel, "WPM");
+            JLabel wpm = new JLabel("" + currentRace.getWPM() + "                          ");
+            wpmPanel.add(wpm);
+
+            JPanel changePanel = new JPanel();
+            HelperUtilities.addTitleBorder(changePanel, "Change In Accuracy");
+            JLabel changeAccuracy = new JLabel("" + currentRace.getAccuracyChange() + "                          ");
+            changePanel.add(changeAccuracy);
+
+            race.add(racePosPanel);
+            race.add(wpmPanel);
+            race.add(accuracyPanel);
+            race.add(trueAccuracyPanel);
+            race.add(changePanel);
+
+            historyContent.add(race);
+        }
+
+        JButton exit = new JButton("Back");
+        exit.addActionListener(e -> {
+            cards.show(menus, nextMenu);
+        });
+
+        JScrollPane scrollHistory = new JScrollPane(historyContent);
+        content.add(scrollHistory, BorderLayout.CENTER);
+        container.add(content, BorderLayout.CENTER);
+        container.add(exit, BorderLayout.SOUTH);
+        HelperUtilities.addTitle(container);
+
+        return container;
+    }
+}
+
+class ConfigureCompareMenu extends Menu
+{
+    private ArrayList<TypistSimulation> typists;
+    private ArrayList<TypistSimulation> selectedTypists;
+    private HashMap<TypistSimulation, JCheckBox> typistButtonMap;
+    private String selectedMetric;
+
+    public ConfigureCompareMenu(GameInfo gameInformation)
+    {
+        super(gameInformation);
+        typists = gameInformation.getTypists();
+        selectedTypists = new ArrayList<>();
+        typistButtonMap = new HashMap<>();
+        selectedMetric = null; 
+    }
+
+    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu, ArrayList<PerformanceMetric> results)
+    {
+        JPanel content = new JPanel(new BorderLayout());
+        JPanel typistsContent = new JPanel();
+        typistsContent.setLayout(new BoxLayout(typistsContent, BoxLayout.Y_AXIS));
+
+        Iterator<TypistSimulation> typistsIterator = typists.iterator();
+        TypistSimulation currentTypist = null;
+
+        while(typistsIterator.hasNext())
+        {
+            currentTypist = typistsIterator.next();
+            JPanel typistInfo = new JPanel(new BorderLayout());
+            JPanel nameWrapper = new JPanel();
+            HelperUtilities.addTitleBorder(nameWrapper, "Typist");
+            JLabel typistName = new JLabel(currentTypist.getName() + " ( " + currentTypist.getSymbol() + " )                     ");
+            HelperUtilities.centerText(typistName);
+            nameWrapper.add(typistName);
+
+            JPanel checkPanel = new JPanel();
+            HelperUtilities.addTitleBorder(checkPanel, "Tick");
+            JCheckBox select = new JCheckBox("Select Typist");
+            checkPanel.add(select);
+
+            typistInfo.add(nameWrapper, BorderLayout.CENTER);
+            typistInfo.add(checkPanel, BorderLayout.EAST);
+
+            HelperUtilities.addPanelPadding(typistInfo, 10);
+
+            typistButtonMap.put(currentTypist, select);
+
+            typistsContent.add(typistInfo);
+        }
+
+        JRadioButton wpm = new JRadioButton("WPM");
+        JRadioButton position = new JRadioButton("Position");
+        JRadioButton burnoutCount = new JRadioButton("Burnout Count");
+        JRadioButton trueAccuracy = new JRadioButton("True Accuracy");
+        JLabel error = HelperUtilities.createError("Invalid Input");
+        ButtonGroup metrics = new ButtonGroup();
+        metrics.add(wpm);
+        metrics.add(position);
+        metrics.add(burnoutCount);
+        metrics.add(trueAccuracy);
+        JPanel radioButtons = new JPanel(new FlowLayout());
+        radioButtons.add(wpm);
+        radioButtons.add(position);
+        radioButtons.add(burnoutCount);
+        radioButtons.add(trueAccuracy);
+
+        JButton previousMenu = new JButton("Back");
+        JButton submit = new JButton("Submit");
+        JPanel buttons = new JPanel(new FlowLayout());
+
+        submit.addActionListener(e ->{
+            Iterator<TypistSimulation> iteratorTypist = typists.iterator();
+            TypistSimulation selectTypist = null;
+
+            while(iteratorTypist.hasNext())
+            {
+               selectTypist = iteratorTypist.next();
+               JCheckBox check = typistButtonMap.get(selectTypist);
+
+               if(check.isSelected())
+               {
+                selectedTypists.add(selectTypist);
+               }
+            }
+
+            if(wpm.isSelected())
+            {
+                selectedMetric = "WPM";
+            }
+            else if(position.isSelected())
+            {
+                selectedMetric = "POSITION";
+            }
+            else if(burnoutCount.isSelected())
+            {
+                selectedMetric = "BURNOUT_COUNT";
+            }
+            else if(trueAccuracy.isSelected())
+            {
+                selectedMetric = "TRUE_ACCURACY";
+            }
+
+            if(selectedTypists.isEmpty() || selectedMetric == null)
+            {
+                content.add(error, BorderLayout.NORTH);
+                HelperUtilities.refresh(content);
+            }
+            else{
+                CompareMenu compareMenu = new CompareMenu(getGameInfo(), selectedTypists, results);
+                menus.add(compareMenu.createMenu(menus, cards, nextMenu, selectedMetric), "COMPARE");
+                selectedMetric = null;
+                selectedTypists.clear();
+
+                if(content.isAncestorOf(error))
+                {
+                    content.remove(error);
+                    HelperUtilities.refresh(content);
+                }
+                cards.show(menus, "COMPARE");
+            }
+        });
+
+        previousMenu.addActionListener(e ->{
+            cards.show(menus, "RESULTS");
+        });
+
+        buttons.add(previousMenu);
+        buttons.add(submit);
+
+        JScrollPane typistScroll = new JScrollPane(typistsContent);
+
+        content.add(typistScroll, BorderLayout.CENTER); 
+        content.add(radioButtons, BorderLayout.SOUTH);  
+        container.add(content, BorderLayout.CENTER);
+        container.add(buttons, BorderLayout.SOUTH);
+        HelperUtilities.addTitle(container);
+        
+        return container;
+    }
+}
+
+class CompareMenu extends Menu
+{
+    ArrayList<PerformanceMetric> selectedTypistMetrics;
+
+    public CompareMenu(GameInfo gameInformation, ArrayList<TypistSimulation> selectedTypists, ArrayList<PerformanceMetric> results)
+    {
+        super(gameInformation);
+        selectedTypistMetrics = new ArrayList<>();
+        setupComparisions(selectedTypists, results);
+    }
+
+    public JPanel createMenu(JPanel menus, CardLayout cards, String nextMenu, String selectedMetric)
+    {
+        JPanel content = new JPanel(new BorderLayout());
+        JPanel typistsContent = new JPanel();
+        typistsContent.setLayout(new BoxLayout(typistsContent, BoxLayout.Y_AXIS));
+        PerformanceMetric currentMetrics = null;
+        Iterator<PerformanceMetric> metricsIterator = selectedTypistMetrics.iterator();
+
+        while(metricsIterator.hasNext())
+        {
+            currentMetrics = metricsIterator.next();
+            TypistSimulation currentTypist = currentMetrics.getTypist();
+            JPanel typistInfo = new JPanel(new BorderLayout());
+
+            JPanel namePanel = new JPanel();
+            HelperUtilities.addTitleBorder(namePanel, "Typist");
+            JLabel typistName = new JLabel(currentTypist.getName() + " ( " + currentTypist.getSymbol() + " )                     ");
+            HelperUtilities.centerText(typistName);
+            namePanel.add(typistName);
+
+            String padding = "                    ";
+
+            JPanel metric = new JPanel();
+
+            if(selectedMetric.equals("WPM"))
+            {
+                HelperUtilities.addTitleBorder(metric, "WPM");
+                JLabel metricLabel = new JLabel(currentMetrics.getWPM() + padding);
+                metric.add(metricLabel);
+            }
+
+            else if(selectedMetric.equals("POSITION"))
+            {
+                HelperUtilities.addTitleBorder(metric, "Position");
+                JLabel metricLabel = new JLabel(currentMetrics.getPosition() + padding);
+                metric.add(metricLabel);
+            }
+            else if(selectedMetric.equals("BURNOUT_COUNT"))
+            {
+                HelperUtilities.addTitleBorder(metric, "Burnout Count");
+                JLabel metricLabel = new JLabel(currentMetrics.getBurnoutCount() + padding);
+                metric.add(metricLabel);
+            }
+            else if(selectedMetric.equals("TRUE_ACCURACY"))
+            {
+                HelperUtilities.addTitleBorder(metric, "True Accuracy");
+                JLabel metricLabel = new JLabel(currentMetrics.getTrueAccuracy() + padding);
+                metric.add(metricLabel);
+            }
+
+            typistInfo.add(namePanel, BorderLayout.WEST);
+            typistInfo.add(metric, BorderLayout.CENTER);
+            typistsContent.add(typistInfo);
+        }
+
+        JButton button = new JButton("Back");
+        button.addActionListener(e ->{
+            cards.show(menus, "COMPARE_CONFIGURE");
+        });
+
+        JScrollPane typistScroll = new JScrollPane(typistsContent);
+
+        content.add(typistScroll, BorderLayout.CENTER);
+        container.add(content, BorderLayout.CENTER);
+        container.add(button, BorderLayout.SOUTH);
+
+        HelperUtilities.addTitle(container);
+
+        return container;
+    }
+
+    private void setupComparisions(ArrayList<TypistSimulation> selectedTypists, ArrayList<PerformanceMetric> results)
+    {
+        PerformanceMetric currentMetric = null;
+        //System.out.println(results.get(0));
+        Iterator<PerformanceMetric> metricsIterator = results.iterator();
+
+        while(metricsIterator.hasNext())
+        {
+            currentMetric = metricsIterator.next();
+            if(selectedTypists.contains(currentMetric.getTypist()))
+            {
+                selectedTypistMetrics.add(currentMetric);
+            }
+        }
     }
 }
