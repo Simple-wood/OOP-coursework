@@ -215,34 +215,6 @@ race.startRace();
 
 ---
 
-## 🔧 Configuration & Customization
-
-### Typist Customization
-
-```java
-// Base accuracy (0.0 = never correct, 1.0 = always correct)
-double accuracy = 0.85;
-
-// Typing speed increment per turn
-int typeIncrement = 1;
-
-// Styling options (Part 2)
-String typingStyle = "aggressive";  // or "conservative"
-String keyboard = "mechanical";      // or "membrane"
-```
-
-### Global Modes (Part 2)
-
-```java
-boolean[] modes = {
-    true,   // [0] Autocorrect mode enabled
-    false,  // [1] Caffeine mode disabled
-    false   // [2] Night mode disabled
-};
-```
-
----
-
 ## 📊 Performance Metrics
 
 The application calculates:
@@ -260,21 +232,3 @@ The application calculates:
 - **GUI Framework:** Swing 
 
 ---
-
-## 📝 License
-
-This project is part of the ECS414U Object Oriented Programming course.
-```
-
-## Part 2 — GUI Simulation
-
-To be implemented as part of the coursework. Place all GUI-related source files in this folder. The graphical version is started by calling `startRaceGUI()`.
-
-## Dependencies
-
-- Java Development Kit (JDK) 11 or higher
-- Java Swing and AWT used throughout part (This is included)
-
-## Notes
-
-- All code should compile and run using standard command-line tools without any IDE-specific configuration.
