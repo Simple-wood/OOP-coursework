@@ -257,6 +257,11 @@ public class TypingRaceSimulation
 
     public void updateAndGetResults(ArrayList<PerformanceMetric> results, int numberOfWords, double timePerTurn)
     {
+        if(! results.isEmpty())
+        {
+            results.clear();
+        }
+        
         int position = 1;
         Iterator<TypistSimulation> winnersIterator = winners.iterator();
         TypistSimulation currentTypist = winnersIterator.next();
