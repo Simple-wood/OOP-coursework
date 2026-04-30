@@ -6,6 +6,11 @@ import java.util.Iterator;
 import java.util.HashMap;
 
 /**
+* @author Kishal Chhetri
+* @version 1
+**/
+
+/**
  * The Menu class serves as a base container for UI menu screens
  * within the typing race application.
  *
