@@ -1,6 +1,6 @@
 # TypingRaceSimulator
 
-A competitive typing speed simulator where multiple typists race to complete passages of text. Features realistic typing mechanics including accuracy-based mistypes, burnout events, and various gameplay modifiers.
+A competitive typing speed simulator where multiple typists race to complete passages of text.
 
 ---
 
@@ -108,6 +108,7 @@ A graphical window will open allowing you to:
 - View detailed performance metrics
 - Access race history
 
+You can run multiple races in one session
 ---
 
 ## 🎮 Game Mechanics
