@@ -198,23 +198,6 @@ You can run multiple races in one session
 
 ---
 
-## 💡 Usage Example (Part 1)
-
-```java
-// Create a race with 500-character passage
-TypingRace race = new TypingRace(500);
-
-// Add typists
-race.configureTypists(scanner); // Interactive setup
-
-// Run the race
-race.startRace();
-
-// Results are displayed automatically
-```
-
----
-
 ## 📊 Performance Metrics
 
 The application calculates:
